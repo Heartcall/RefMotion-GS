@@ -113,3 +113,37 @@ Observed results:
 - The synthetic renderer uses fixed analytic reflected-color lobes rather than Blender/Cycles path tracing.
 - The method nearly matches but does not beat oracle reflective-mask exclusion on leakage; the evidence beyond simple exclusion is currently strongest under noisy masks and in albedo RMSE.
 - No learned reflection field, inter-reflection residual, full PBR, relighting, or material editing code was introduced.
+
+### Persistent Workflow Setup
+
+Evidence:
+
+- Created `AGENTS.md`, `OPERATING_PROTOCOL.md`, `ACTIVE_SCOPE.md`, `NEXT_ACTION.md`, and `DECISION_LOG.md`.
+- Created reusable prompts under `PROMPTS/` for phase planning, milestone implementation, short audit, full GPT-5.5 xhigh go/no-go audit, and paper writing.
+- Encoded the required loop: read active scope and next action, plan or implement only the current task, verify, log, classify, audit, update decisions, update the next exact task, and stop only on explicit stop conditions.
+- Set `NEXT_ACTION.md` to: "Run Phase 3 planning audit or begin Milestone 3.1 only after plan audit passes."
+- Preserved the strict RefMotion-GS scope: no learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, or representation-novelty framing.
+
+Verification:
+
+```bash
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py
+python refmotion_gs_mvp/scripts/run_mvp_diagnostics.py --out-dir refmotion_gs_mvp/outputs/run_latest
+```
+
+Observed:
+
+- `pytest`: 16 passed in 9.50s.
+- `py_compile`: exit code 0.
+- Diagnostics decision checks:
+  - `loss_correlated_near_gt`: true.
+  - `normal_error_improves_10_percent`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+
+Decision:
+
+- Treat the workflow setup as a small documentation milestone.
+- The next project action remains a planning audit before Phase 3 implementation.
