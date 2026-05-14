@@ -15,6 +15,17 @@ Read these files in order at the start of every session:
 7. Relevant `outputs/phase2/*.md`
 8. Relevant source, scripts, tests, and result files under `refmotion_gs_mvp/`
 
+## Entry Prompts
+
+Use the appropriate entry prompt for the current workflow state:
+
+- **Entry A: Continue current work** -> `PROMPTS/continue_current_work_prompt.md`
+- **Entry B: Execute current milestone** -> `PROMPTS/milestone_implementation_prompt.md`
+- **Entry C: Small milestone audit** -> `PROMPTS/short_audit_prompt.md`
+- **Entry D: Major-stage full audit** -> `PROMPTS/full_xhigh_audit_prompt.md`
+
+When in doubt, start with Entry A and follow `NEXT_ACTION.md` exactly. Do not use Entry B until `NEXT_ACTION.md` explicitly allows implementation.
+
 ## Main Loop
 
 1. Read `ACTIVE_SCOPE.md` and `NEXT_ACTION.md`.
@@ -95,6 +106,24 @@ If a planned task violates these rules, update `DECISION_LOG.md`, revise `NEXT_A
 
 ## Required Evidence Style
 
+## Session End Summary
+
+At the end of every session summary, include:
+
+- Next exact action from `NEXT_ACTION.md`
+- Recommended next model
+- One-line reason for the model choice
+
+Model policy:
+
+- Use GPT-5.5 high for planning repairs, implementation, debugging, and short audits.
+- Use GPT-5.5 xhigh for major-stage audits, go/no-go decisions, novelty-risk decisions, pivot/stop decisions, and theory-critical reviews.
+- Use GPT-5.5 medium only for low-risk repetitive code cleanup, formatting, or mechanical refactors that do not affect claims, metrics, experiments, or scope.
+
+If `NEXT_ACTION.md` requires a major-stage audit or a go/no-go decision, recommend GPT-5.5 xhigh.
+If `NEXT_ACTION.md` requires implementation, debugging, planning repair, or short audit, recommend GPT-5.5 high.
+If uncertain, recommend GPT-5.5 high, except for go/no-go or pivot decisions, where GPT-5.5 xhigh is mandatory.
+
 Every result update must separate:
 
 - **Evidence:** commands, metrics, files written, observed failures.
@@ -123,4 +152,3 @@ Stop and ask the user only if one of these is true:
 - the task would change project scope beyond `ACTIVE_SCOPE.md`,
 - evidence indicates a pivot or abandonment decision is needed,
 - a full audit rejects the current phase and no in-scope repair is obvious.
-

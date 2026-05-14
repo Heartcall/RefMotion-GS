@@ -147,3 +147,328 @@ Decision:
 
 - Treat the workflow setup as a small documentation milestone.
 - The next project action remains a planning audit before Phase 3 implementation.
+
+### Phase 3 Planning Audit
+
+Evidence:
+
+- Ran the current major-stage planning audit from `NEXT_ACTION.md` using `PROMPTS/full_xhigh_audit_prompt.md`.
+- Wrote `outputs/phase3/full_go_no_go.md`.
+- Reviewed `ACTIVE_SCOPE.md`, `NEXT_ACTION.md`, `OPERATING_PROTOCOL.md`, `PROJECT_PLAN.md`, `MVP_RESULTS.md`, `DECISION_LOG.md`, Phase 2 critique files, current source/tests/scripts, and latest metrics.
+- Found no dedicated `PHASE3_PLAN.md` or equivalent Phase 3 plan file before the audit report was created.
+
+Inference:
+
+- The Phase 3 direction remains inside RefMotion-GS scope.
+- The current plan is not yet executable because P0 planning details are missing.
+- Dense / tangent-space normal optimization must remain Candidate Milestone 3.2, not Milestone 3.1.
+
+Decision:
+
+- Audit verdict: `PLAN APPROVED WITH REQUIRED FIXES`.
+- Implementation remains blocked until P0 planning fixes are resolved.
+
+Next action:
+
+- Create `refmotion_gs_mvp/PHASE3_PLAN.md` resolving the P0 items in `outputs/phase3/full_go_no_go.md`.
+
+### Phase 3 Plan Creation
+
+Evidence:
+
+- Created `PHASE3_PLAN.md`.
+- The plan resolves the P0 planning gaps identified by `outputs/phase3/full_go_no_go.md`.
+- No experiment source, scripts, tests, or metrics were changed as part of this planning action.
+
+Inference:
+
+- The next implementation milestone is now defined but should not start until a short audit confirms the plan satisfies the P0 requirements.
+
+Decision:
+
+- Treat `PHASE3_PLAN.md` creation as a planning repair milestone.
+
+Next action:
+
+- Run a short audit of `PHASE3_PLAN.md` using `PROMPTS/short_audit_prompt.md`.
+
+### Phase 3 Plan Short Audit
+
+Evidence:
+
+- Ran the short audit requested by `NEXT_ACTION.md` using `PROMPTS/short_audit_prompt.md`.
+- Wrote `outputs/phase3/phase3_plan_short_audit.md`.
+- Verified `PHASE3_PLAN.md` contains the required Milestone 3.1/3.2 split, required MVP baselines, oracle-mask decision gate, forbidden-component exclusions, tests, output paths, and verification commands.
+- Ran a placeholder scan on `PHASE3_PLAN.md`; no placeholder markers were found.
+- Confirmed no diffs under `src`, `scripts`, `tests`, or `outputs/run_latest`.
+
+Inference:
+
+- The P0 planning repair is complete.
+- Milestone 3.1 can start as an implementation-only framework refactor.
+
+Decision:
+
+- Short audit verdict: `PASS`.
+
+Next action:
+
+- Begin Milestone 3.1 implementation from `PHASE3_PLAN.md`, starting with `tests/test_decision_checks.py`.
+
+### Milestone 3.1 Step 1: Decision-Check Tests
+
+Evidence:
+
+- Added `tests/test_decision_checks.py`.
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_decision_checks.py -q
+```
+
+Observed:
+
+- Exit code: 2.
+- Collection failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.src.decision_checks'`.
+
+Inference:
+
+- The Step 1 red test state is confirmed for the intended reason.
+- No production code was implemented in this step.
+
+Next action:
+
+- Implement `refmotion_gs_mvp/src/decision_checks.py` with the functions required by `PHASE3_PLAN.md`, then rerun `pytest refmotion_gs_mvp/tests/test_decision_checks.py -q`.
+
+### Milestone 3.1 Step 2: Decision-Check Helper
+
+Evidence:
+
+- Created `src/decision_checks.py`.
+- Implemented `compute_routing_decision_checks` and `require_baselines` with the required Phase 3 baseline names.
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_decision_checks.py -q
+python -m py_compile refmotion_gs_mvp/src/decision_checks.py
+```
+
+Observed:
+
+- `2 passed in 0.01s`.
+- `py_compile` exited 0.
+
+Inference:
+
+- The decision-check helper preserves the MVP leakage decision gates.
+- The helper requires all required baselines before computing routing comparisons.
+- No source metric definitions, experiment scripts, or result outputs were changed.
+
+Next action:
+
+- Add `tests/test_experiment_protocol.py`, run `pytest refmotion_gs_mvp/tests/test_experiment_protocol.py -q`, and confirm it fails because `refmotion_gs_mvp/src/experiment_protocol.py` does not exist.
+
+### Milestone 3.1 Step 3: Experiment Protocol Tests
+
+Evidence:
+
+- Added `tests/test_experiment_protocol.py`.
+- The tests cover Phase 3.1 metadata guardrails and summary reporting for the oracle-mask decision status.
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_experiment_protocol.py -q
+```
+
+Observed:
+
+- Exit code: 2.
+- Collection failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.src.experiment_protocol'`.
+
+Inference:
+
+- The Step 3 red test state is confirmed for the intended missing module.
+- No experiment protocol implementation, experiment script, or result output was added in this step.
+
+Next action:
+
+- Implement `refmotion_gs_mvp/src/experiment_protocol.py` with `phase3_milestone_metadata` and `write_summary`, then rerun `pytest refmotion_gs_mvp/tests/test_experiment_protocol.py -q`.
+
+### Milestone 3.1 Step 4: Experiment Protocol Helper
+
+Evidence:
+
+- Created `src/experiment_protocol.py`.
+- Implemented `phase3_milestone_metadata` with Phase 3.1 forbidden-component flags set to false.
+- Implemented `write_summary` to write a markdown summary that explicitly records `routing_beats_oracle_mask` and oracle-mask leakage status.
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_experiment_protocol.py -q
+python -m py_compile refmotion_gs_mvp/src/experiment_protocol.py
+```
+
+Observed:
+
+- `2 passed in 0.02s`.
+- `py_compile` exited 0.
+
+Inference:
+
+- The experiment protocol helper satisfies the targeted Phase 3.1 metadata and summary tests.
+- The implementation does not add dense normal optimization, learned near-field reflection, experiment runner code, or result outputs.
+
+Next action:
+
+- Add `scripts/run_phase3_milestone31.py`, run `python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework`, and verify that it writes `metrics.json` and `summary.md` while preserving existing MVP metrics and Phase 3 forbidden-component flags.
+
+### Milestone 3.1 Step 5: Phase 3 Framework Runner
+
+Evidence:
+
+- Created `scripts/run_phase3_milestone31.py`.
+- The runner calls the existing MVP diagnostics path, recomputes routing decision checks through `src/decision_checks.py`, attaches Phase 3 metadata through `src/experiment_protocol.py`, rewrites `metrics.json`, and writes `summary.md`.
+- Ran:
+
+```bash
+python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework
+python -m py_compile refmotion_gs_mvp/scripts/run_phase3_milestone31.py
+```
+
+Observed:
+
+- Runner exited 0 and printed:
+  - `loss_correlated_near_gt`: true.
+  - `normal_error_improves_10_percent`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+- `py_compile` exited 0.
+- Wrote `outputs/phase3/milestone_31_framework/metrics.json`.
+- Wrote `outputs/phase3/milestone_31_framework/summary.md`.
+- The generated `dataset`, `loss_landscape`, `normal_optimization`, `texture_baking`, and `uv_texture_baking` sections match `outputs/run_latest/metrics.json`.
+- Phase 3 metadata:
+  - `milestone`: `3.1`.
+  - `purpose`: `experiment_framework_refactor`.
+  - `implemented_dense_normal_optimization`: false.
+  - `implemented_learned_near_field_reflection`: false.
+
+Inference:
+
+- The Phase 3 Milestone 3.1 runner preserves existing MVP behavior while adding the required framework metadata and summary output.
+- The summary explicitly reports that routing does not beat oracle mask exclusion on the leakage metric.
+- No dense normal optimization, learned near-field reflection, renderer change, loss change, or metric-definition change was introduced.
+
+Next action:
+
+- Run Milestone 3.1 Step 6 full verification: `pytest refmotion_gs_mvp/tests -q`, `python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py`, and `python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework`.
+
+### Milestone 3.1 Step 6: Full Verification
+
+Evidence:
+
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py
+python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework
+```
+
+Observed:
+
+- `pytest`: `20 passed in 9.59s`.
+- `py_compile`: exit code 0.
+- Phase 3 runner: exit code 0.
+- Runner decision checks:
+  - `loss_correlated_near_gt`: true.
+  - `normal_error_improves_10_percent`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+- `outputs/phase3/milestone_31_framework/metrics.json` exists.
+- `outputs/phase3/milestone_31_framework/summary.md` exists.
+- Required texture and UV baseline names are present:
+  - `all_pixels`.
+  - `oracle_mask_exclusion`.
+  - `noisy_mask_only`.
+  - `reflection_confidence_routing`.
+  - `normal_refinement_plus_routing`.
+- Generated `dataset`, `loss_landscape`, `normal_optimization`, `texture_baking`, and `uv_texture_baking` sections match `outputs/run_latest/metrics.json`.
+- Phase 3 metadata:
+  - `milestone`: `3.1`.
+  - `purpose`: `experiment_framework_refactor`.
+  - `implemented_dense_normal_optimization`: false.
+  - `implemented_learned_near_field_reflection`: false.
+- `summary.md` explicitly reports `routing_beats_oracle_mask: false` and the oracle-mask leakage values.
+
+Inference:
+
+- Milestone 3.1 implementation satisfies the planned framework refactor pass criteria.
+- The framework preserves existing MVP behavior and records the required Phase 3 schema and summary.
+- The result still does not beat oracle mask exclusion on leakage, so this remains `continue with caution`, not a paper-level claim.
+- No dense / tangent-space normal optimization, learned near-field reflection, renderer change, loss change, or metric-definition change was introduced.
+
+Decision:
+
+- Classify Milestone 3.1 as a small-to-medium implementation milestone.
+- Milestone 3.1 is ready for the required short audit using `PROMPTS/short_audit_prompt.md`.
+
+Next action:
+
+- Run the Milestone 3.1 short audit using `PROMPTS/short_audit_prompt.md`, checking source, tests, logs, `outputs/phase3/milestone_31_framework/metrics.json`, and `outputs/phase3/milestone_31_framework/summary.md`.
+
+### Milestone 3.1 Short Audit
+
+Evidence:
+
+- Ran the short audit requested by `NEXT_ACTION.md` using `PROMPTS/short_audit_prompt.md`.
+- Wrote `outputs/phase3/milestone_31_short_audit.md`.
+- Audited the Milestone 3.1 source helpers, tests, runner, logs, `metrics.json`, and `summary.md`.
+- Confirmed the latest full verification evidence:
+  - `pytest refmotion_gs_mvp/tests -q`: `20 passed in 9.59s`.
+  - `python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py`: exit code 0.
+  - `python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework`: exit code 0.
+- Confirmed required baselines are present in texture and UV leakage metrics.
+- Confirmed `summary.md` explicitly reports `routing_beats_oracle_mask: false`.
+- Confirmed no diffs in `src/synthetic_scene.py`, `src/losses.py`, `src/normal_optimization.py`, `src/uv_baking.py`, or `src/metrics.py`.
+
+Findings:
+
+- PASS: Milestone 3.1 stayed inside RefMotion-GS scope.
+- PASS: It did not implement forbidden components.
+- PASS: It preserved the existing MVP metric sections and baselines.
+- PASS WITH CAUTION: Metrics are unchanged because this is a framework refactor; oracle-mask exclusion still slightly beats routing on leakage.
+
+Decision:
+
+- Short audit verdict: `PASS`.
+- Milestone 3.1 framework refactor is accepted.
+- Milestone 3.2 remains blocked until a GPT-5.5 xhigh major-stage audit passes.
+
+Next action:
+
+- Run a GPT-5.5 xhigh major-stage audit using `PROMPTS/full_xhigh_audit_prompt.md`, focused on whether Milestone 3.2 dense / tangent-space normal optimization is sufficiently specified and in scope to begin.
+
+### Milestone 3.2 Major-Audit Gate Check
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `DECISION_LOG.md`, latest `IMPLEMENTATION_LOG.md`, `MVP_RESULTS.md`, `PHASE3_PLAN.md`, `PROMPTS/full_xhigh_audit_prompt.md`, and latest Phase 3 outputs.
+- `NEXT_ACTION.md` requires a GPT-5.5 xhigh major-stage audit before Milestone 3.2 implementation.
+- This session was not explicitly started as GPT-5.5 xhigh.
+
+Inference:
+
+- Per `PROMPTS/continue_current_work_prompt.md`, the major-stage audit must not be run in this session.
+- Milestone 3.2 remains blocked.
+
+Decision:
+
+- Do not run the major-stage audit with a weaker or unspecified model.
+- Reinforce `NEXT_ACTION.md` to request a GPT-5.5 xhigh audit session explicitly.
+
+Next action:
+
+- Start or resume this work in a GPT-5.5 xhigh session, then run the major-stage audit using `PROMPTS/full_xhigh_audit_prompt.md`.

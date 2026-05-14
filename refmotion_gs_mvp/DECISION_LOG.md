@@ -65,3 +65,118 @@ Future sessions should read `ACTIVE_SCOPE.md` and `NEXT_ACTION.md` first, execut
 
 The user should not need to restate the project prompt unless a stop condition is reached.
 
+## 2026-05-14: Continue-Current-Work Xhigh Gate Fixed
+
+**Evidence:**
+
+- `PROMPTS/continue_current_work_prompt.md` now explicitly distinguishes xhigh and non-xhigh sessions for major-stage audits.
+- `NEXT_ACTION.md` now makes the Phase 3 planning audit executable in a GPT-5.5 xhigh session instead of only stating a gate.
+
+**Decision:**
+
+Fixed the continue-current-work gate so that an xhigh session runs required major-stage audits instead of stopping merely because an xhigh audit is required.
+
+**Implication:**
+
+Future xhigh sessions should run `PROMPTS/full_xhigh_audit_prompt.md` or a dedicated Phase 3 audit prompt when `NEXT_ACTION.md` requires a major-stage audit.
+
+## 2026-05-14: Phase 3 Planning Audit Completed
+
+**Evidence:**
+
+- `refmotion_gs_mvp/outputs/phase3/full_go_no_go.md` records the Phase 3 planning audit.
+- No dedicated `PHASE3_PLAN.md` or equivalent Phase 3 plan file was present before the audit.
+- MVP metrics still show the reduced hypothesis is not falsified, but normal-refinement plus routing does not beat oracle mask exclusion on leakage.
+
+**Decision:**
+
+The Phase 3 concept is **PLAN APPROVED WITH REQUIRED FIXES**. Implementation remains blocked until P0 planning fixes are resolved.
+
+**Implication:**
+
+The next action is to create a dedicated Phase 3 plan, with Milestone 3.1 as experiment framework refactor and Milestone 3.2 as dense / tangent-space normal optimization.
+
+## 2026-05-14: Phase 3 Plan Created
+
+**Evidence:**
+
+- Created `refmotion_gs_mvp/PHASE3_PLAN.md`.
+- The plan defines Milestone 3.1 as experiment framework refactor and Milestone 3.2 as dense / tangent-space normal optimization.
+- The plan includes files, tests, output directories, verification commands, required baselines, decision gates, and scope exclusions.
+
+**Decision:**
+
+The P0 planning repair from `outputs/phase3/full_go_no_go.md` has been drafted. It still needs a short audit before implementation starts.
+
+**Implication:**
+
+Future sessions should audit `PHASE3_PLAN.md` using `PROMPTS/short_audit_prompt.md` before starting Milestone 3.1 code.
+
+## 2026-05-14: Phase 3 Plan Short Audit Passed
+
+**Evidence:**
+
+- `outputs/phase3/phase3_plan_short_audit.md` records the short audit.
+- The audit confirmed `PHASE3_PLAN.md` resolves the P0 planning fixes, preserves scope, preserves MVP baselines, keeps dense / tangent-space normal optimization in Milestone 3.2, and defines Milestone 3.1 implementation tests and outputs.
+- No source, script, test, or `outputs/run_latest` diffs were reported during the audit.
+
+**Decision:**
+
+`PHASE3_PLAN.md` passes short audit. Milestone 3.1 implementation may begin.
+
+**Implication:**
+
+The next session should implement only Milestone 3.1 from `PHASE3_PLAN.md`, starting with decision-check tests.
+
+## 2026-05-14: Milestone 3.1 Framework Verification Passed
+
+**Evidence:**
+
+- `pytest refmotion_gs_mvp/tests -q` passed with `20 passed in 9.59s`.
+- `python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py` exited 0.
+- `python refmotion_gs_mvp/scripts/run_phase3_milestone31.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_31_framework` exited 0.
+- `outputs/phase3/milestone_31_framework/metrics.json` contains the required baseline suite and decision checks.
+- `outputs/phase3/milestone_31_framework/summary.md` explicitly reports `routing_beats_oracle_mask: false`.
+- Phase 3 metadata records `implemented_dense_normal_optimization: false` and `implemented_learned_near_field_reflection: false`.
+
+**Decision:**
+
+Milestone 3.1 implementation satisfies the framework refactor verification gate and is ready for the required short audit.
+
+**Implication:**
+
+Future sessions should run `PROMPTS/short_audit_prompt.md` before starting Milestone 3.2 or any dense / tangent-space normal optimization work.
+
+## 2026-05-14: Milestone 3.1 Short Audit Passed
+
+**Evidence:**
+
+- `outputs/phase3/milestone_31_short_audit.md` records the short audit.
+- The audit checked Milestone 3.1 source helpers, tests, runner, logs, `outputs/phase3/milestone_31_framework/metrics.json`, and `outputs/phase3/milestone_31_framework/summary.md`.
+- Full verification evidence remains `20 passed in 9.59s`, Python compilation exit 0, and Phase 3 runner exit 0.
+- The audit confirmed the required baseline suite is present and that `summary.md` reports `routing_beats_oracle_mask: false`.
+- The audit found no implementation of dense normal optimization, learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, or material editing.
+
+**Decision:**
+
+Milestone 3.1 short audit verdict is `PASS`. The framework refactor is accepted.
+
+**Implication:**
+
+Milestone 3.2 is a major method-validation step. Future sessions must run a GPT-5.5 xhigh major-stage audit before implementing dense / tangent-space normal optimization.
+
+## 2026-05-14: Milestone 3.2 Xhigh Audit Gate Enforced
+
+**Evidence:**
+
+- `NEXT_ACTION.md` requires a GPT-5.5 xhigh major-stage audit before Milestone 3.2 implementation.
+- `PROMPTS/continue_current_work_prompt.md` requires stopping rather than running a major-stage audit when the current session is not GPT-5.5 xhigh.
+- The current session was not explicitly started as GPT-5.5 xhigh.
+
+**Decision:**
+
+Do not run the Milestone 3.2 major-stage audit in this session. Require a GPT-5.5 xhigh audit session.
+
+**Implication:**
+
+Milestone 3.2 remains blocked. Future sessions should start with GPT-5.5 xhigh and run `PROMPTS/full_xhigh_audit_prompt.md`; no dense / tangent-space normal optimization should begin before that audit passes.
