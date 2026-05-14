@@ -472,3 +472,65 @@ Decision:
 Next action:
 
 - Start or resume this work in a GPT-5.5 xhigh session, then run the major-stage audit using `PROMPTS/full_xhigh_audit_prompt.md`.
+
+### Milestone 3.2 Pre-Implementation Authorization Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with explicit operator model confirmation for the required GPT-5.5 xhigh gate.
+- Used `PROMPTS/pre_major_milestone_audit_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, `IMPLEMENTATION_LOG.md`, `MVP_RESULTS.md`, `DECISION_LOG.md`, `outputs/phase2/theory_rewrite.md`, `outputs/phase2/reviewer_attack.md`, `outputs/phase2/core_contribution_reduction.md`, `outputs/phase3/milestone_31_short_audit.md`, and current context source/tests/scripts.
+- Wrote `outputs/phase3/milestone_32_preimplementation_audit.md`.
+
+Findings:
+
+- Scope compliance passed: Milestone 3.2 dense / tangent-space normal optimization is an in-scope RefMotion-GS direction and does not require forbidden components.
+- Implementation authorization failed: `PHASE3_PLAN.md` lists exact Milestone 3.2 parameterization, regularization, sampling, seed, comparison, and schema details as required before implementation, but does not define them.
+- Test readiness failed: the plan does not name Milestone 3.2 test files, test functions, or expected assertions.
+- Metric/output readiness failed: the plan lists minimum metrics but not the exact output directory, `metrics.json` schema, summary sections, or machine-readable decision checks.
+
+Decision:
+
+- Verdict: `BLOCKED UNTIL PLAN FIXES`.
+- Do not implement Milestone 3.2 code yet.
+- The next action is a planning repair to add the missing Milestone 3.2 P0 implementation subplan to `PHASE3_PLAN.md`.
+
+Next action:
+
+- Repair `PHASE3_PLAN.md` with exact Milestone 3.2 implementation details, then rerun the pre-implementation authorization audit using GPT-5.5 xhigh.
+
+### Milestone 3.2 Planning Repair
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `planning`.
+- Used `PROMPTS/phase_plan_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, `IMPLEMENTATION_LOG.md`, `MVP_RESULTS.md`, `DECISION_LOG.md`, `outputs/phase2/final_go_no_go.md`, `outputs/phase2/theory_rewrite.md`, `outputs/phase2/reviewer_attack.md`, `outputs/phase2/core_contribution_reduction.md`, `outputs/phase3/milestone_32_preimplementation_audit.md`, and `outputs/phase3/milestone_31_short_audit.md`.
+- Updated `PHASE3_PLAN.md` with a dedicated Milestone 3.2 P0 implementation subplan.
+- The subplan defines:
+  - sphere-UV tangent normal delta grid parameterization,
+  - unit-normal projection and coefficient clipping,
+  - smoothness and L2 regularization,
+  - deterministic coordinate-search optimizer settings,
+  - files to create or modify,
+  - tests to add before implementation,
+  - output directory and exact metrics schema,
+  - required baselines and no-cycle dense ablation,
+  - verification commands,
+  - pass/revise/pivot/stop gates,
+  - reviewer-risk reporting.
+
+Inference:
+
+- The planning repair addresses the P0 blockers from `outputs/phase3/milestone_32_preimplementation_audit.md`.
+- No experiment code, source modules, scripts, tests, or experiment result metrics were changed.
+- Milestone 3.2 implementation remains blocked until the repaired plan passes a GPT-5.5 xhigh pre-implementation authorization audit.
+
+Decision:
+
+- Planning repair complete.
+- Next action is to rerun the Milestone 3.2 pre-implementation authorization audit using GPT-5.5 xhigh and `PROMPTS/pre_major_milestone_audit_prompt.md`.
+
+Next action:
+
+- Rerun the Milestone 3.2 pre-implementation authorization audit with explicit operator confirmation for GPT-5.5 xhigh.

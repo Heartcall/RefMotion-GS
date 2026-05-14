@@ -340,7 +340,7 @@ Stop and request user input if:
 
 **Classification:** major method-validation milestone.
 
-**Audit requirement before implementation:** GPT-5.5 xhigh full or targeted go/no-go audit.
+**Audit requirement before implementation:** GPT-5.5 xhigh pre-implementation authorization audit using `PROMPTS/pre_major_milestone_audit_prompt.md`.
 
 Milestone 3.2 must not start until Milestone 3.1 passes and is audited.
 
@@ -350,23 +350,351 @@ Purpose:
 - Keep Formulation A and the baseline suite unchanged.
 - Show whether reflective normal error still improves under denser normal degrees of freedom.
 
-Required plan before implementation:
+### 7.1 Scope And Non-Goals
 
-- Exact parameterization of the normal update.
-- Exact smoothness or regularization terms.
-- Exact sampling count and seeds.
-- Exact comparison to global-rotation evidence.
-- Exact result schema extending the Milestone 3.1 schema.
+Milestone 3.2 remains a diagnostic on the existing analytic MVP dataset. It does not add a learned reflection field, inter-reflection residual, full PBR optimization, relighting, material editing, renderer integration, or representation-novelty claim.
 
-Minimum metrics:
+Allowed implementation:
 
-- reflective-region normal angular error before and after,
-- non-reflective normal angular error before and after,
-- reflection-cycle loss history,
-- all texture/leakage baseline metrics,
-- `routing_beats_all_pixels`,
-- `routing_beats_noisy_mask`,
-- `routing_beats_oracle_mask`.
+- a shared tangent-space normal-offset grid over the existing analytic sphere UV parameterization,
+- deterministic NumPy coordinate-search optimization,
+- smoothness and magnitude regularization,
+- existing Formulation A `reflection_cycle_loss`,
+- existing texture/leakage baseline suite,
+- a diagnostic ablation with dense variables but no reflection-cycle loss.
+
+Do not change:
+
+- `src/synthetic_scene.py`
+- `src/losses.py` behavior or loss semantics,
+- `src/uv_baking.py` metric definitions,
+- existing Milestone 3.1 runner outputs.
+
+### 7.2 Normal Parameterization
+
+Create a shared sphere-UV tangent normal grid:
+
+```python
+normal_delta_uv: np.ndarray  # shape: (uv_height, uv_width, 2)
+uv_height = 16
+uv_width = 32
+```
+
+Each texel stores two tangent coefficients `(a, b)`. For every object pixel with surface point `x`, compute UV with the existing `sphere_points_to_uv(x)` convention and nearest-neighbor texel lookup. Let `n_init(view, y, x)` be the perturbed initialization normal.
+
+Define a deterministic tangent frame from the surface point:
+
+```text
+radial = normalize(surface_point)
+reference = [0, 1, 0] if abs(dot(radial, [0, 1, 0])) < 0.95 else [1, 0, 0]
+t1 = normalize(cross(reference, radial))
+t2 = normalize(cross(radial, t1))
+```
+
+The optimized normal at a pixel is:
+
+```text
+n_opt = normalize(n_init + a(texel) * t1 + b(texel) * t2)
+```
+
+This keeps Formulation A unchanged: dense normals affect reflected-ray geometry because `n_opt` is passed into `reflection_cycle_loss`, which computes reflected directions and reflected-ray candidate matching.
+
+Initialization:
+
+- build `n_init` by rotating all object normals from `dataset.normals` by `8.0` degrees around the x axis, matching the MVP global-rotation diagnostic,
+- initialize `normal_delta_uv` to zeros,
+- never use ground-truth normals inside the optimizer objective; ground truth is used only for metrics.
+
+Unit constraint:
+
+- every composed pixel normal must be normalized after adding tangent offsets,
+- texel coefficients are clipped to `[-0.35, 0.35]` after every accepted update.
+
+### 7.3 Objective And Regularization
+
+Main objective:
+
+```text
+L_total = L_cycle(normals(normal_delta_uv))
+          + lambda_smooth * L_smooth(normal_delta_uv)
+          + lambda_l2 * L_l2(normal_delta_uv)
+```
+
+Defaults:
+
+```text
+lambda_smooth = 0.02
+lambda_l2 = 0.001
+sample_count = 250
+loss_seed = 59
+```
+
+Smoothness:
+
+```text
+L_smooth = mean over valid neighbor pairs of
+           ||delta[u, v] - delta[u + 1, v]||_2^2
+         + ||delta[u, v] - delta[u, v + 1]||_2^2
+```
+
+Use horizontal wrap for the sphere-UV `u` axis. Do not wrap the polar `v` axis. Include only texels that receive at least one object-pixel observation in `dataset.object_mask`; inactive texels remain zero.
+
+Magnitude:
+
+```text
+L_l2 = mean ||delta[u, v]||_2^2
+```
+
+The ablation without reflection-cycle loss uses:
+
+```text
+L_no_cycle = lambda_smooth * L_smooth + lambda_l2 * L_l2
+```
+
+It starts from the same `n_init` and zero delta grid. Its expected behavior is to provide no meaningful normal recovery beyond smoothing/magnitude bias; it is included to show that dense degrees of freedom alone do not explain any improvement.
+
+### 7.4 Optimizer
+
+Use deterministic coordinate search, not learned fields or autograd-heavy training.
+
+Defaults:
+
+```text
+iterations = 8
+initial_step = 0.08
+step_decay = 0.5
+min_step = 0.01
+max_active_texels = 64
+seed = 53
+```
+
+Active texels:
+
+- rank texels by count of reflective object pixels mapped to that texel,
+- optimize the top `max_active_texels` texels,
+- keep all other texels fixed at zero for the first Milestone 3.2 diagnostic.
+
+Per iteration:
+
+1. Evaluate current `L_total`.
+2. For each active texel, each tangent channel, and signs `[-1, +1]`, try one step.
+3. Compose normals, normalize, evaluate `L_total`.
+4. Accept the single best candidate if it improves objective.
+5. If no candidate improves objective, halve the step.
+6. Stop early if `step < min_step`.
+
+Record:
+
+- `loss_history`,
+- accepted update `(iteration, texel_y, texel_x, channel, step, loss)`,
+- active texel count,
+- final step size.
+
+### 7.5 Files
+
+Create:
+
+- `refmotion_gs_mvp/src/dense_normal_optimization.py`
+- `refmotion_gs_mvp/scripts/run_phase3_milestone32.py`
+- `refmotion_gs_mvp/tests/test_dense_normal_optimization.py`
+- `refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py`
+
+Modify only if needed:
+
+- `refmotion_gs_mvp/src/experiment_protocol.py`
+- `refmotion_gs_mvp/src/decision_checks.py`
+- `refmotion_gs_mvp/IMPLEMENTATION_LOG.md`
+- `refmotion_gs_mvp/DECISION_LOG.md`
+- `refmotion_gs_mvp/NEXT_ACTION.md`
+
+Do not modify for Milestone 3.2:
+
+- `refmotion_gs_mvp/src/synthetic_scene.py`
+- `refmotion_gs_mvp/src/losses.py`
+- `refmotion_gs_mvp/src/uv_baking.py`
+- `refmotion_gs_mvp/src/metrics.py`
+- `refmotion_gs_mvp/outputs/run_latest/`
+
+### 7.6 Tests
+
+Add tests before implementation:
+
+- `tests/test_dense_normal_optimization.py::test_tangent_delta_normals_are_unit_length`
+  - create a small analytic dataset,
+  - build zero and nonzero tangent deltas,
+  - assert composed object normals are finite and unit length.
+
+- `tests/test_dense_normal_optimization.py::test_dense_cycle_optimizer_reduces_reflective_error`
+  - generate a small deterministic dataset,
+  - perturb object normals by 8 degrees,
+  - run the dense optimizer with small settings,
+  - assert reflective normal error improves by at least 10 percent,
+  - assert final objective is not higher than initial objective.
+
+- `tests/test_dense_normal_optimization.py::test_no_cycle_dense_ablation_does_not_use_reflection_cycle_loss`
+  - run the no-cycle ablation,
+  - assert it records `uses_reflection_cycle_loss: False`,
+  - assert it preserves finite unit normals.
+
+- `tests/test_phase3_milestone32_runner.py::test_milestone32_runner_schema_and_scope_flags`
+  - run a reduced runner configuration into a temporary directory,
+  - assert `metrics.json` includes `dense_normal_optimization`, `dense_no_cycle_ablation`, `texture_baking`, `uv_texture_baking`, `decision_checks`, and `phase3`,
+  - assert `phase3.milestone == "3.2"`,
+  - assert forbidden-component flags remain false,
+  - assert all required MVP baselines remain present.
+
+### 7.7 Output Contract
+
+Milestone 3.2 writes:
+
+- `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json`
+- `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/summary.md`
+- `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/dense_loss_history.png`
+- optional visual diagnostics for UV normal-delta magnitude and leakage bars.
+
+`metrics.json` must include:
+
+```json
+{
+  "dataset": {},
+  "loss_landscape": {},
+  "global_rotation_reference": {},
+  "dense_normal_optimization": {
+    "parameterization": "sphere_uv_tangent_delta_grid",
+    "uv_height": 16,
+    "uv_width": 32,
+    "active_texels": 64,
+    "uses_reflection_cycle_loss": true,
+    "init_reflective_error_deg": 0.0,
+    "final_reflective_error_deg": 0.0,
+    "reflective_error_improvement_percent": 0.0,
+    "init_nonreflective_error_deg": 0.0,
+    "final_nonreflective_error_deg": 0.0,
+    "loss_history": [],
+    "accepted_updates": [],
+    "lambda_smooth": 0.02,
+    "lambda_l2": 0.001,
+    "sample_count": 250,
+    "seed": 53,
+    "loss_seed": 59
+  },
+  "dense_no_cycle_ablation": {
+    "uses_reflection_cycle_loss": false,
+    "init_reflective_error_deg": 0.0,
+    "final_reflective_error_deg": 0.0,
+    "reflective_error_improvement_percent": 0.0,
+    "loss_history": []
+  },
+  "texture_baking": {
+    "specular_leakage_score": {},
+    "albedo_rmse": {}
+  },
+  "uv_texture_baking": {
+    "specular_leakage_score": {},
+    "albedo_rmse": {}
+  },
+  "decision_checks": {
+    "loss_correlated_near_gt": true,
+    "dense_normal_error_improves_10_percent": true,
+    "dense_beats_no_cycle_ablation": true,
+    "routing_beats_all_pixels": true,
+    "routing_beats_noisy_mask": true,
+    "routing_beats_oracle_mask": false
+  },
+  "phase3": {
+    "milestone": "3.2",
+    "purpose": "dense_tangent_space_normal_optimization",
+    "implemented_dense_normal_optimization": true,
+    "implemented_learned_near_field_reflection": false,
+    "implemented_inter_reflection_residual": false,
+    "implemented_full_pbr_optimization": false,
+    "claimed_relighting_or_editing": false
+  }
+}
+```
+
+The exact numeric values are filled by the runner. Placeholder zeros above define schema shape only.
+
+`summary.md` must explicitly report:
+
+- whether dense reflective normal error improves by at least 10 percent,
+- whether dense reflection-cycle optimization beats the no-cycle dense ablation,
+- whether routing beats all-pixel and noisy-mask baselines,
+- whether routing beats oracle mask exclusion,
+- if oracle mask remains better, the measured reason for continuing or revising,
+- that the result is still synthetic analytic evidence and not a paper-level claim.
+
+### 7.8 Baselines And Ablations
+
+Required texture/leakage baselines:
+
+- `all_pixels`
+- `oracle_mask_exclusion`
+- `noisy_mask_only`
+- `reflection_confidence_routing`
+- `normal_refinement_plus_routing`
+
+Required normal-optimization comparisons:
+
+- `global_rotation_reference`: existing `optimize_global_normal_rotation` behavior from the MVP, rerun with the same dataset and reported as a reference only.
+- `dense_no_cycle_ablation`: same dense parameterization and regularization, but without `reflection_cycle_loss`.
+- `dense_reflection_cycle_optimizer`: the proposed Milestone 3.2 optimizer using `L_total`.
+
+The dense optimizer is allowed to underperform the global-rotation reference because the global search is intentionally favorable. It must beat the perturbed initialization by at least 10 percent in reflective-region normal error to pass.
+
+### 7.9 Verification Commands
+
+Run:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py
+python refmotion_gs_mvp/scripts/run_phase3_milestone32.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals
+```
+
+### 7.10 Pass / Revise / Pivot / Stop
+
+Pass Milestone 3.2 if all are true:
+
+- all tests pass,
+- Python compilation exits 0,
+- the runner writes `metrics.json`, `summary.md`, and `dense_loss_history.png`,
+- dense reflective-region normal error improves by at least 10 percent over perturbed initialization,
+- dense reflection-cycle optimizer improves more than the no-cycle dense ablation,
+- reflection-cycle loss remains correlated with normal correctness,
+- routing beats all-pixel and noisy-mask baselines,
+- oracle mask exclusion is reported honestly,
+- no forbidden component is implemented or claimed.
+
+Revise if any are true:
+
+- dense normal error improves less than 10 percent but loss decreases,
+- dense optimizer does not beat no-cycle ablation,
+- routing beats all-pixel but not noisy-mask baking,
+- output schema or summary is missing required fields,
+- runtime is too high for repeatable smoke validation.
+
+Pivot after audit if any are true:
+
+- dense normal optimization cannot improve reflective-region normal error while no-cycle or mask-only baselines explain the texture gains,
+- oracle mask exclusion remains stronger and no measured noisy-mask, albedo, seam, or normal-accuracy signal justifies continuing,
+- feature correspondences are too ambiguous under dense degrees of freedom.
+
+Stop if either is true:
+
+- reflection-cycle loss no longer correlates with normal correctness on the controlled analytic scene,
+- implementing the milestone would require learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, or representation-novelty claims.
+
+### 7.11 Reviewer-Risk Reporting
+
+Milestone 3.2 summaries must state:
+
+- MaterialRefGS / photometric-variation risk is not fully closed; this milestone tests reflected-ray geometry against internal ablations, not a full MaterialRefGS baseline.
+- TextureSplat / texture-only risk is addressed only by preserving texture-only and mask-only leakage baselines.
+- SpecTRe-GS and Ref-DGS overlap is avoided because no learned near-field reflection field or local reflection Gaussian is implemented.
+- Mask-only threat remains binding; oracle mask exclusion must be reported even if it beats the proposed method.
 
 ## 8. Milestone 3.3: Stricter Scene Or Renderer Validation
 
@@ -421,16 +749,16 @@ This plan resolves the P0 planning fixes from `outputs/phase3/full_go_no_go.md` 
 - The required baseline suite and decision checks.
 - The scope lock against forbidden components.
 - How the plan addresses oracle-mask leakage, global-rotation optimizer favorability, analytic renderer limitations, MaterialRefGS, and TextureSplat.
+- The Milestone 3.2 P0 implementation subplan required by `outputs/phase3/milestone_32_preimplementation_audit.md`, including exact parameterization, regularization, optimizer settings, tests, outputs, baselines, and decision gates.
 
 ## 11. Next Workflow Step
 
-Run a short audit of this plan using `PROMPTS/short_audit_prompt.md`.
+Run a GPT-5.5 xhigh Milestone 3.2 pre-implementation authorization audit using `PROMPTS/pre_major_milestone_audit_prompt.md`.
 
-If the short audit passes:
+If the audit returns `APPROVED TO IMPLEMENT` or `APPROVED WITH REQUIRED FIXES` with no P0 blockers:
 
-- update `NEXT_ACTION.md` to begin Milestone 3.1 implementation only.
+- update `NEXT_ACTION.md` to begin Milestone 3.2 implementation only.
 
-If the short audit fails:
+If the audit returns `BLOCKED UNTIL PLAN FIXES`:
 
-- revise this plan and rerun the short audit.
-
+- revise this plan and rerun the pre-implementation authorization audit.

@@ -49,14 +49,28 @@ Supported action types:
 
 For `major_preimplementation_audit`, if `NEXT_ACTION.md` does not name a dedicated pre-implementation audit prompt, stop and update `NEXT_ACTION.md` to require one.
 
+## Model Confirmation Rule
+
+Codex cannot reliably inspect the backend model label from inside the prompt. Therefore, do not attempt to independently verify the active model by asking "what model is now" or by inferring from internal text.
+
+Use this rule:
+
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and the user command includes an explicit model confirmation such as:
+  - "MODEL CONFIRMATION: I have switched Codex to the model required by NEXT_ACTION.md"
+  - "this session is GPT-5.5 xhigh"
+  treat the model gate as satisfied and execute the required xhigh action.
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and there is no explicit user/operator model confirmation in the current command or latest session context, stop and request the user to switch to GPT-5.5 xhigh and rerun the generic command with model confirmation.
+- If `NEXT_ACTION.md` requires GPT-5.5 high or does not require xhigh, proceed normally.
+- Never stop merely because the assistant cannot independently inspect the backend model label when the user has explicitly confirmed the required model.
+
 ## Model Gate
 
 If the action type is `major_post_result_audit` or `major_preimplementation_audit`:
 
-- If the current session is GPT-5.5 xhigh, run the required audit now.
-- If the current session is not GPT-5.5 xhigh, stop and update `NEXT_ACTION.md` to request a GPT-5.5 xhigh session.
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and the user/operator has explicitly confirmed the required model in the current command or latest session context, run the required audit now.
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and there is no explicit user/operator model confirmation, stop and request a GPT-5.5 xhigh session plus model confirmation in the generic command.
 - Never perform a major-stage audit with a weaker model.
-- Never stop merely because xhigh is required if the current session is already GPT-5.5 xhigh.
+- Never stop merely because xhigh is required if the user/operator has explicitly confirmed that the required model is active.
 
 If the action type is `implementation`, `planning`, `short_audit`, `paper_writing`, or `workflow_repair`, GPT-5.5 high is sufficient unless `NEXT_ACTION.md` explicitly requires GPT-5.5 xhigh.
 

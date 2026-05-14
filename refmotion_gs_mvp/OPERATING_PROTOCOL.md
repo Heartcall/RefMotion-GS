@@ -72,6 +72,20 @@ how to update NEXT_ACTION.md after completion
 
 Historical evidence belongs in `IMPLEMENTATION_LOG.md` or `DECISION_LOG.md`, not `NEXT_ACTION.md`.
 
+## Model Gate Policy
+
+- Model selection is controlled by the operator through Codex CLI `/model`.
+- The assistant may not be able to introspect the backend model label.
+- For required xhigh actions, explicit operator confirmation in the user command is sufficient.
+- The workflow should gate on the presence of explicit operator confirmation, not on assistant self-inspection.
+- The recommended generic command is:
+
+```text
+MODEL CONFIRMATION: I have switched Codex to the model required by refmotion_gs_mvp/NEXT_ACTION.md. If NEXT_ACTION.md requires GPT-5.5 xhigh, treat this message as explicit operator confirmation that this session is GPT-5.5 xhigh.
+
+Use refmotion_gs_mvp/PROMPTS/continue_current_work_prompt.md.
+```
+
 ## Main Loop
 
 1. Read `ACTIVE_SCOPE.md` and `NEXT_ACTION.md`.

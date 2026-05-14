@@ -216,3 +216,56 @@ Generalized the continue-current-work command into a dispatcher. Future user com
 **Implication:**
 
 Future sessions should be able to continue by using only `PROMPTS/continue_current_work_prompt.md`. The dispatcher must read `NEXT_ACTION.md`, select the required prompt, execute only the current action, update logs/results/decision state, rewrite `NEXT_ACTION.md`, and stop.
+
+## 2026-05-14: Explicit Operator Model Confirmation Gate
+
+**Evidence:**
+
+- Codex CLI UI controls model selection through `/model`, but the assistant cannot reliably inspect the backend model label from inside the prompt.
+- The previous workflow asked the assistant to determine whether the current session was GPT-5.5 xhigh, causing false stops after operator-side model switches.
+- Updated `PROMPTS/continue_current_work_prompt.md` with a model confirmation rule.
+- Updated `OPERATING_PROTOCOL.md` with a model gate policy and recommended generic command.
+- Updated `NEXT_ACTION.md` so required xhigh gates are satisfied by explicit operator confirmation in the user command.
+
+**Decision:**
+
+Fixed the model gate so that explicit operator confirmation satisfies the required-model check. Codex should no longer stop merely because it cannot independently inspect the backend model label.
+
+**Implication:**
+
+For required xhigh actions, future sessions should proceed when the user command explicitly confirms that Codex has been switched to the required model. If no explicit confirmation is present, the workflow should request GPT-5.5 xhigh plus model confirmation and stop.
+
+## 2026-05-14: Milestone 3.2 Pre-Implementation Audit Blocked On Plan Detail
+
+**Evidence:**
+
+- `outputs/phase3/milestone_32_preimplementation_audit.md` records the GPT-5.5 xhigh pre-implementation authorization audit.
+- The audit confirmed Milestone 3.2 is conceptually in scope and remains inside RefMotion-GS.
+- `PHASE3_PLAN.md` requires exact normal-update parameterization, regularization, sampling, seeds, comparison, and result schema before Milestone 3.2 implementation.
+- Those details are not yet defined in `PHASE3_PLAN.md`.
+- The audit found no need to pivot or stop, and no experiment code was implemented.
+
+**Decision:**
+
+Milestone 3.2 implementation is `BLOCKED UNTIL PLAN FIXES`. The next action is a planning repair, not dense / tangent-space normal optimization code.
+
+**Implication:**
+
+Future sessions should update `PHASE3_PLAN.md` with the missing Milestone 3.2 P0 implementation subplan, then rerun the pre-implementation authorization audit with GPT-5.5 xhigh before any Milestone 3.2 code begins.
+
+## 2026-05-14: Milestone 3.2 Planning Repair Completed
+
+**Evidence:**
+
+- Updated `PHASE3_PLAN.md` with a dedicated Milestone 3.2 implementation subplan.
+- The repaired plan defines the dense / tangent-space normal parameterization, optimizer variables, unit-normal projection, smoothness and L2 regularization, deterministic coordinate-search settings, planned files, tests, output schema, baselines, ablations, verification commands, and decision gates.
+- The plan keeps Milestone 3.2 inside RefMotion-GS scope and continues to forbid learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, and representation-novelty claims.
+- No source, script, test, or experiment-output code was changed during the planning repair.
+
+**Decision:**
+
+The Milestone 3.2 P0 planning repair is complete. Implementation remains blocked until a GPT-5.5 xhigh pre-implementation authorization audit approves the repaired plan.
+
+**Implication:**
+
+Future sessions should rerun the Milestone 3.2 pre-implementation authorization audit using `PROMPTS/pre_major_milestone_audit_prompt.md`. If approved with no P0 blockers, the next action may become Milestone 3.2 implementation using GPT-5.5 high.
