@@ -26,6 +26,52 @@ Use the appropriate entry prompt for the current workflow state:
 
 When in doubt, start with Entry A and follow `NEXT_ACTION.md` exactly. Do not use Entry B until `NEXT_ACTION.md` explicitly allows implementation.
 
+## NEXT_ACTION Schema
+
+`NEXT_ACTION.md` must contain exactly these fields:
+
+```markdown
+# RefMotion-GS Next Action
+
+## Current Next Action
+<one exact action>
+
+## Action Type
+one of:
+- planning
+- implementation
+- short_audit
+- major_preimplementation_audit
+- major_post_result_audit
+- paper_writing
+- workflow_repair
+
+## Required Model
+GPT-5.5 high or GPT-5.5 xhigh
+
+## Required Prompt
+path to the prompt file, or "infer from action type"
+
+## Required Reads
+files to read before executing
+
+## Success Criteria
+conditions for considering this action complete
+
+## Stop Conditions
+conditions that require stopping or asking the user
+
+## Expected Files To Create Or Update
+list of files
+
+## Next Action Update Rule
+how to update NEXT_ACTION.md after completion
+```
+
+`NEXT_ACTION.md` must contain only the current action, not long history.
+
+Historical evidence belongs in `IMPLEMENTATION_LOG.md` or `DECISION_LOG.md`, not `NEXT_ACTION.md`.
+
 ## Main Loop
 
 1. Read `ACTIVE_SCOPE.md` and `NEXT_ACTION.md`.
@@ -89,6 +135,11 @@ Classify a milestone as **major** when any are true:
 - changes the paper claim, scope, or pivot decision.
 
 Major stages require GPT-5.5 xhigh full audit before implementation is considered accepted.
+
+## Audit Prompt Policy
+
+- Use pre-implementation audit prompts before starting major implementation milestones.
+- Use `full_xhigh_audit_prompt.md` only after a major stage has produced implementation results or when making a go/no-go / pivot / stop decision.
 
 ## Scope Guard
 

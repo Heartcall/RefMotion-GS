@@ -6,7 +6,7 @@ Use this prompt in a fresh Codex session when the user wants the project to cont
 
 You are Codex working inside `/home/liuly/Surface_Reconstruction/Glossy/new_idea`. The active project is `refmotion_gs_mvp`, named RefMotion-GS.
 
-Use GPT-5.5 high unless `NEXT_ACTION.md` or `OPERATING_PROTOCOL.md` requires GPT-5.5 xhigh for a major-stage full audit.
+Use GPT-5.5 high unless `NEXT_ACTION.md` or `OPERATING_PROTOCOL.md` requires GPT-5.5 xhigh for a major-stage audit, go/no-go decision, pivot/stop decision, novelty-risk decision, or theory-critical review.
 
 ## Required Startup
 
@@ -22,20 +22,47 @@ Before taking any project action, read:
 8. latest relevant result files under `refmotion_gs_mvp/outputs/`
 9. any source, scripts, tests, plans, or prompt files explicitly named by `NEXT_ACTION.md`
 
+## Generic Dispatch Rule
+
+Always treat `NEXT_ACTION.md` as the source of the current task.
+
+Read the `Action Type` and `Required Prompt` fields from `NEXT_ACTION.md`.
+
+- If `NEXT_ACTION.md` specifies a `Required Prompt`, use that prompt.
+- If no `Required Prompt` is specified, or if it says `infer from action type`, infer the prompt from `Action Type`.
+- Execute at most one current action per session.
+- After completing the current action, update logs, result files, `DECISION_LOG.md`, and `NEXT_ACTION.md` as required by the selected prompt and current action.
+- Stop after completing the current action.
+- Do not automatically continue into the next task.
+
+Supported action types:
+
+| Action Type | Prompt |
+|---|---|
+| `planning` | `PROMPTS/phase_plan_prompt.md` |
+| `short_audit` | `PROMPTS/short_audit_prompt.md` |
+| `major_post_result_audit` | `PROMPTS/full_xhigh_audit_prompt.md` |
+| `major_preimplementation_audit` | the pre-implementation audit prompt named in `NEXT_ACTION.md` |
+| `implementation` | `PROMPTS/milestone_implementation_prompt.md` |
+| `paper_writing` | `PROMPTS/paper_writing_prompt.md` |
+| `workflow_repair` | the current user-approved workflow repair instructions in `NEXT_ACTION.md` |
+
+For `major_preimplementation_audit`, if `NEXT_ACTION.md` does not name a dedicated pre-implementation audit prompt, stop and update `NEXT_ACTION.md` to require one.
+
+## Model Gate
+
+If the action type is `major_post_result_audit` or `major_preimplementation_audit`:
+
+- If the current session is GPT-5.5 xhigh, run the required audit now.
+- If the current session is not GPT-5.5 xhigh, stop and update `NEXT_ACTION.md` to request a GPT-5.5 xhigh session.
+- Never perform a major-stage audit with a weaker model.
+- Never stop merely because xhigh is required if the current session is already GPT-5.5 xhigh.
+
+If the action type is `implementation`, `planning`, `short_audit`, `paper_writing`, or `workflow_repair`, GPT-5.5 high is sufficient unless `NEXT_ACTION.md` explicitly requires GPT-5.5 xhigh.
+
 ## Execution Rule
 
 Continue exactly from `NEXT_ACTION.md`.
-
-- If `NEXT_ACTION.md` says the next action is a planning audit, run the audit prompt it names.
-- If `NEXT_ACTION.md` says the next action is implementation, execute only the named milestone.
-- If `NEXT_ACTION.md` says the next action is a small audit, use `PROMPTS/short_audit_prompt.md`.
-- If `NEXT_ACTION.md` says the next action is a major-stage audit, use `PROMPTS/full_xhigh_audit_prompt.md`.
-
-If a major-stage audit is required:
-
-- If the current session is GPT-5.5 xhigh, run the audit now using `PROMPTS/full_xhigh_audit_prompt.md` or the audit prompt named by `NEXT_ACTION.md`.
-- If the current session is not GPT-5.5 xhigh, stop after updating `NEXT_ACTION.md` to request a GPT-5.5 xhigh audit session.
-- Do not perform a major-stage audit with a weaker model.
 
 Do not invent a different next task. Do not begin implementation when `NEXT_ACTION.md` says audit or planning is required first.
 

@@ -180,3 +180,39 @@ Do not run the Milestone 3.2 major-stage audit in this session. Require a GPT-5.
 **Implication:**
 
 Milestone 3.2 remains blocked. Future sessions should start with GPT-5.5 xhigh and run `PROMPTS/full_xhigh_audit_prompt.md`; no dense / tangent-space normal optimization should begin before that audit passes.
+
+## 2026-05-14: Milestone 3.2 Pre-Implementation Audit Separated
+
+**Evidence:**
+
+- `NEXT_ACTION.md` previously pointed the Milestone 3.2 pre-implementation gate to `PROMPTS/full_xhigh_audit_prompt.md`.
+- `PROMPTS/full_xhigh_audit_prompt.md` is a post-result go/no-go audit prompt and asks for evidence from an already completed major stage.
+- Milestone 3.2 has not been implemented yet.
+- Created `PROMPTS/pre_milestone_32_audit_prompt.md` for GPT-5.5 xhigh pre-implementation authorization.
+- Updated `OPERATING_PROTOCOL.md` to distinguish pre-implementation audit prompts from post-result full go/no-go audits.
+- Updated `NEXT_ACTION.md` to use `PROMPTS/pre_milestone_32_audit_prompt.md`.
+
+**Decision:**
+
+Separated Milestone 3.2 pre-implementation authorization audit from post-result full go/no-go audit to prevent Codex from requiring dense-normal results before implementation.
+
+**Implication:**
+
+Future GPT-5.5 xhigh sessions should run the Milestone 3.2 pre-implementation authorization audit, not the post-result full go/no-go audit. Milestone 3.2 code remains blocked until that authorization audit approves implementation or approves it with no P0 blockers.
+
+## 2026-05-14: Generic Continue-Current-Work Dispatcher
+
+**Evidence:**
+
+- Updated `PROMPTS/continue_current_work_prompt.md` with a generic dispatch rule based on `NEXT_ACTION.md` fields.
+- Added the `NEXT_ACTION.md` schema to `OPERATING_PROTOCOL.md`.
+- Created `PROMPTS/pre_major_milestone_audit_prompt.md` as a reusable pre-implementation audit prompt for major milestones.
+- Rewrote `NEXT_ACTION.md` to contain only the current Milestone 3.2 pre-implementation audit action.
+
+**Decision:**
+
+Generalized the continue-current-work command into a dispatcher. Future user commands can remain generic; task specificity lives in NEXT_ACTION.md.
+
+**Implication:**
+
+Future sessions should be able to continue by using only `PROMPTS/continue_current_work_prompt.md`. The dispatcher must read `NEXT_ACTION.md`, select the required prompt, execute only the current action, update logs/results/decision state, rewrite `NEXT_ACTION.md`, and stop.
