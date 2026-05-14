@@ -1,0 +1,96 @@
+{
+  "dataset": {
+    "num_views": 8,
+    "height": 36,
+    "width": 48,
+    "object_pixels": 3200,
+    "reflective_pixels": 2496
+  },
+  "loss_landscape": {
+    "0deg": 0.0005611105653096932,
+    "1deg": 0.0005811010930655471,
+    "3deg": 0.0006926487699608295,
+    "5deg": 0.0009197920034853393,
+    "10deg": 0.0019402526425899235,
+    "smooth_random": 0.008498769904632624
+  },
+  "normal_optimization": {
+    "init_reflective_error_deg": 5.7091979244066104,
+    "final_reflective_error_deg": 0.3569152456956942,
+    "reflective_error_improvement_percent": 93.74841702071855,
+    "init_nonreflective_error_deg": 6.050038057050539,
+    "final_nonreflective_error_deg": 0.37822275380886655,
+    "loss_history": [
+      0.0014502013166587903,
+      0.0007945886168547505,
+      0.0005638439768474818,
+      0.0005638439768474818,
+      0.0005638439768474818,
+      0.0005599377168278506,
+      0.0005599377168278506,
+      0.0005588875658240342
+    ],
+    "accepted_steps": [
+      [
+        "x",
+        -4.0
+      ],
+      [
+        "x",
+        -4.0
+      ],
+      [
+        "x",
+        -1.0
+      ],
+      [
+        "x",
+        0.5
+      ]
+    ]
+  },
+  "texture_baking": {
+    "specular_leakage_score": {
+      "all_pixels": 0.9845810540201183,
+      "oracle_mask_exclusion": 0.1889352304278196,
+      "noisy_mask_only": 0.48058422963629,
+      "reflection_confidence_routing": 0.20411952363401434,
+      "normal_refinement_plus_routing": 0.18994099794232064
+    },
+    "albedo_rmse": {
+      "all_pixels": 0.15493268014400016,
+      "oracle_mask_exclusion": 0.08883342661823146,
+      "noisy_mask_only": 0.09827136194153686,
+      "reflection_confidence_routing": 0.03474389022354434,
+      "normal_refinement_plus_routing": 0.03739227320947693
+    },
+    "noisy_mask_false_negative_rate_observed": 0.34294871794871795
+  },
+  "uv_texture_baking": {
+    "specular_leakage_score": {
+      "all_pixels": 0.8937587779761458,
+      "oracle_mask_exclusion": 0.18894842742715495,
+      "noisy_mask_only": 0.48688553583972904,
+      "reflection_confidence_routing": 0.20555594061539617,
+      "normal_refinement_plus_routing": 0.19090032877604535
+    },
+    "albedo_rmse": {
+      "all_pixels": 0.14287779314593882,
+      "oracle_mask_exclusion": 0.08882049812030215,
+      "noisy_mask_only": 0.10497112705538789,
+      "reflection_confidence_routing": 0.03822351541988649,
+      "normal_refinement_plus_routing": 0.03967209496171139
+    },
+    "atlas_resolution": [
+      64,
+      128
+    ]
+  },
+  "decision_checks": {
+    "loss_correlated_near_gt": true,
+    "normal_error_improves_10_percent": true,
+    "routing_beats_all_pixels": true,
+    "routing_beats_noisy_mask": true,
+    "routing_beats_oracle_mask": false
+  }
+}
