@@ -51,26 +51,25 @@ For `major_preimplementation_audit`, if `NEXT_ACTION.md` does not name a dedicat
 
 ## Model Confirmation Rule
 
-Codex cannot reliably inspect the backend model label from inside the prompt. Therefore, do not attempt to independently verify the active model by asking "what model is now" or by inferring from internal text.
+Codex cannot reliably inspect the backend model label from inside the prompt. The operator controls the model through Codex CLI `/model`.
 
-Use this rule:
+When the user invokes this prompt, treat the invocation as operator confirmation that Codex has already been switched to the model required by `NEXT_ACTION.md`.
 
-- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and the user command includes an explicit model confirmation such as:
-  - "MODEL CONFIRMATION: I have switched Codex to the model required by NEXT_ACTION.md"
-  - "this session is GPT-5.5 xhigh"
-  treat the model gate as satisfied and execute the required xhigh action.
-- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and there is no explicit user/operator model confirmation in the current command or latest session context, stop and request the user to switch to GPT-5.5 xhigh and rerun the generic command with model confirmation.
-- If `NEXT_ACTION.md` requires GPT-5.5 high or does not require xhigh, proceed normally.
-- Never stop merely because the assistant cannot independently inspect the backend model label when the user has explicitly confirmed the required model.
+Therefore:
+
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh, proceed with the xhigh-required action after reading `NEXT_ACTION.md`.
+- Do not stop merely because the assistant cannot independently inspect the backend model label.
+- If the user explicitly says the model has not been switched, then stop and request the required model.
+- If the action type is a major audit, still follow the required audit prompt and do not implement code.
 
 ## Model Gate
 
 If the action type is `major_post_result_audit` or `major_preimplementation_audit`:
 
-- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and the user/operator has explicitly confirmed the required model in the current command or latest session context, run the required audit now.
-- If `NEXT_ACTION.md` requires GPT-5.5 xhigh and there is no explicit user/operator model confirmation, stop and request a GPT-5.5 xhigh session plus model confirmation in the generic command.
+- If `NEXT_ACTION.md` requires GPT-5.5 xhigh, treat this prompt invocation as operator confirmation that the required model has been selected and run the required audit now.
+- If the user explicitly says the model has not been switched to the model required by `NEXT_ACTION.md`, stop and request the required model.
 - Never perform a major-stage audit with a weaker model.
-- Never stop merely because xhigh is required if the user/operator has explicitly confirmed that the required model is active.
+- Never stop merely because xhigh is required when the user invoked this continue prompt without saying the model was not switched.
 
 If the action type is `implementation`, `planning`, `short_audit`, `paper_writing`, or `workflow_repair`, GPT-5.5 high is sufficient unless `NEXT_ACTION.md` explicitly requires GPT-5.5 xhigh.
 

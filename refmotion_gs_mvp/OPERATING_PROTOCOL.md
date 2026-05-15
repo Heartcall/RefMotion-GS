@@ -74,17 +74,19 @@ Historical evidence belongs in `IMPLEMENTATION_LOG.md` or `DECISION_LOG.md`, not
 
 ## Model Gate Policy
 
-- Model selection is controlled by the operator through Codex CLI `/model`.
-- The assistant may not be able to introspect the backend model label.
-- For required xhigh actions, explicit operator confirmation in the user command is sufficient.
-- The workflow should gate on the presence of explicit operator confirmation, not on assistant self-inspection.
-- The recommended generic command is:
+The default command:
 
 ```text
-MODEL CONFIRMATION: I have switched Codex to the model required by refmotion_gs_mvp/NEXT_ACTION.md. If NEXT_ACTION.md requires GPT-5.5 xhigh, treat this message as explicit operator confirmation that this session is GPT-5.5 xhigh.
-
 Use refmotion_gs_mvp/PROMPTS/continue_current_work_prompt.md.
 ```
+
+is treated as operator confirmation that the CLI model has already been set to the model required by `NEXT_ACTION.md`.
+
+Codex should not attempt to independently inspect the backend model label.
+
+- Model selection is controlled by the operator through Codex CLI `/model`.
+- If the user explicitly says the model has not been switched to the model required by `NEXT_ACTION.md`, stop and request the required model.
+- For major audits, follow the required audit prompt and do not implement code.
 
 ## Main Loop
 

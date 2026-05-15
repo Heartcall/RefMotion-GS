@@ -1,0 +1,142 @@
+{
+  "dataset": {
+    "scene_type": "analytic_near_object_reflection",
+    "num_views": 6,
+    "width": 28,
+    "height": 24,
+    "seed": 173,
+    "object_pixels": 1080,
+    "reflective_pixels": 852,
+    "reflector_hit_fraction": 0.15492957746478872
+  },
+  "reflectors": [
+    {
+      "center": [
+        1.75,
+        0.1,
+        1.15
+      ],
+      "radius": 0.765,
+      "color": [
+        0.95,
+        0.1,
+        0.08
+      ]
+    },
+    {
+      "center": [
+        -1.55,
+        0.35,
+        1.35
+      ],
+      "radius": 0.68,
+      "color": [
+        0.08,
+        0.85,
+        0.18
+      ]
+    },
+    {
+      "center": [
+        0.15,
+        1.45,
+        -1.55
+      ],
+      "radius": 0.85,
+      "color": [
+        0.12,
+        0.22,
+        0.95
+      ]
+    }
+  ],
+  "baseline_milestone33_decision_checks": {
+    "loss_correlated_near_gt": true,
+    "reflector_hit_fraction_sufficient": true,
+    "dense_normal_error_improves_10_percent": false,
+    "dense_beats_no_cycle_ablation": true,
+    "routing_beats_all_pixels": true,
+    "routing_beats_noisy_mask": true,
+    "routing_beats_oracle_mask": false
+  },
+  "dense_trajectory_diagnostics": {
+    "objective_history": [
+      0.014386876237571697,
+      0.013648459206494459,
+      0.01297948528836065,
+      0.012370222405738896,
+      0.01190696506028494,
+      0.011492304001999737,
+      0.01109106660088914,
+      0.010780836558881478,
+      0.010304391097315124
+    ],
+    "reflective_error_history": [
+      5.710456219994247,
+      5.85945894655637,
+      5.921859102420196,
+      6.118055502578642,
+      5.9152946506285,
+      5.7729375843753665,
+      5.86746515091976,
+      5.606176086363757,
+      5.666570971472453
+    ],
+    "nonreflective_error_history": [
+      6.101541691089956,
+      6.253468665088652,
+      6.253468665088652,
+      6.40801739562241,
+      6.40801739562241,
+      6.27701088254727,
+      6.27701088254727,
+      6.27701088254727,
+      6.27701088254727
+    ],
+    "reflective_improvement_history": [
+      0.0,
+      -2.609296364805574,
+      -3.7020314013748403,
+      -7.137770904490114,
+      -3.587076456641841,
+      -1.0941571386599809,
+      -2.7494988995060017,
+      1.8261261379672218,
+      0.7685068728508346
+    ],
+    "objective_reflective_error_correlation": 0.29366840127375765,
+    "accepted_update_count": 8,
+    "worsened_reflective_update_count": 5
+  },
+  "coverage_diagnostics": {
+    "reflector_hit_fraction": 0.15492957746478872,
+    "active_texel_count": 64,
+    "active_texel_hit_fraction_mean": 0.17395833333333333,
+    "active_texel_hit_fraction_min": 0.0,
+    "active_texels_without_finite_hits": 34
+  },
+  "routing_diagnostics": {
+    "uv_leakage": {
+      "all_pixels": 0.9658763096531678,
+      "oracle_mask_exclusion": 0.17595366303189766,
+      "noisy_mask_only": 0.5556875799054598,
+      "reflection_confidence_routing": 0.4632458373229172,
+      "normal_refinement_plus_routing": 0.4714538905111631
+    },
+    "normal_refinement_improves_over_reflection_confidence": false,
+    "normal_refinement_beats_noisy_mask": true,
+    "normal_refinement_beats_oracle_mask": false
+  },
+  "phase3": {
+    "milestone": "3.3_revision",
+    "purpose": "dense_normal_gate_failure_diagnostics",
+    "renderer_path": "analytic_near_object_fallback",
+    "used_blender_cycles": false,
+    "implements_learned_near_field_reflection_field": false,
+    "implements_inter_reflection_residual": false,
+    "implements_full_pbr_optimization": false,
+    "claims_relighting_or_material_editing": false,
+    "claims_representation_novelty": false
+  },
+  "recommendation": "revise: dense trajectory diagnostics explain the failed 10 percent normal gate"
+}

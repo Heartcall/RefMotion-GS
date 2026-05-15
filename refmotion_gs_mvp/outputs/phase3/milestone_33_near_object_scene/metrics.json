@@ -1,0 +1,284 @@
+{
+  "dataset": {
+    "scene_type": "analytic_near_object_reflection",
+    "num_views": 6,
+    "width": 28,
+    "height": 24,
+    "seed": 173,
+    "train_view_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "test_view_indices": [
+      4,
+      5
+    ],
+    "object_pixels": 1080,
+    "reflective_pixels": 852,
+    "reflector_hit_fraction": 0.15492957746478872
+  },
+  "reflectors": [
+    {
+      "center": [
+        1.75,
+        0.1,
+        1.15
+      ],
+      "radius": 0.765,
+      "color": [
+        0.95,
+        0.1,
+        0.08
+      ]
+    },
+    {
+      "center": [
+        -1.55,
+        0.35,
+        1.35
+      ],
+      "radius": 0.68,
+      "color": [
+        0.08,
+        0.85,
+        0.18
+      ]
+    },
+    {
+      "center": [
+        0.15,
+        1.45,
+        -1.55
+      ],
+      "radius": 0.85,
+      "color": [
+        0.12,
+        0.22,
+        0.95
+      ]
+    }
+  ],
+  "loss_landscape": {
+    "0deg": 0.01518530465164876,
+    "5deg": 0.015862829735769086,
+    "10deg": 0.01802097308944506
+  },
+  "global_rotation_reference": {
+    "init_reflective_error_deg": 5.710456219994247,
+    "final_reflective_error_deg": 2.4356515786729616,
+    "reflective_error_improvement_percent": 57.347513318727174,
+    "init_nonreflective_error_deg": 6.101541691089956,
+    "final_nonreflective_error_deg": 2.372355992564745,
+    "loss_history": [
+      0.01682268914588843,
+      0.015231972614214275,
+      0.014505234771194623,
+      0.014505234771194623,
+      0.014404284800016976,
+      0.014347513206464452,
+      0.014347513206464452,
+      0.01431877013980579
+    ],
+    "accepted_steps": [
+      [
+        "x",
+        -4.0
+      ],
+      [
+        "x",
+        -4.0
+      ],
+      [
+        "x",
+        -2.0
+      ],
+      [
+        "y",
+        -2.0
+      ],
+      [
+        "z",
+        -1.0
+      ]
+    ]
+  },
+  "dense_normal_optimization": {
+    "init_reflective_error_deg": 5.710456219994247,
+    "final_reflective_error_deg": 5.666570971472453,
+    "reflective_error_improvement_percent": 0.7685068728508346,
+    "init_nonreflective_error_deg": 6.101541691089956,
+    "final_nonreflective_error_deg": 6.27701088254727,
+    "method_name": "dense_reflection_cycle_optimizer",
+    "parameterization": "sphere_uv_tangent_delta_grid",
+    "uv_height": 16,
+    "uv_width": 32,
+    "active_texels": 64,
+    "uses_reflection_cycle_loss": true,
+    "loss_history": [
+      0.014386876237571697,
+      0.013648459206494459,
+      0.01297948528836065,
+      0.012370222405738896,
+      0.01190696506028494,
+      0.011492304001999737,
+      0.01109106660088914,
+      0.010780836558881478,
+      0.010304391097315124
+    ],
+    "accepted_updates": [
+      {
+        "iteration": 0,
+        "texel_y": 8,
+        "texel_x": 0,
+        "channel": 0,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.013648459206494459
+      },
+      {
+        "iteration": 1,
+        "texel_y": 7,
+        "texel_x": 25,
+        "channel": 0,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.01297948528836065
+      },
+      {
+        "iteration": 2,
+        "texel_y": 8,
+        "texel_x": 0,
+        "channel": 0,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.012370222405738896
+      },
+      {
+        "iteration": 3,
+        "texel_y": 7,
+        "texel_x": 12,
+        "channel": 1,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.01190696506028494
+      },
+      {
+        "iteration": 4,
+        "texel_y": 8,
+        "texel_x": 10,
+        "channel": 1,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.011492304001999737
+      },
+      {
+        "iteration": 5,
+        "texel_y": 7,
+        "texel_x": 17,
+        "channel": 0,
+        "step": -0.08,
+        "update_radius": 1,
+        "loss": 0.01109106660088914
+      },
+      {
+        "iteration": 6,
+        "texel_y": 7,
+        "texel_x": 23,
+        "channel": 1,
+        "step": -0.08,
+        "update_radius": 1,
+        "loss": 0.010780836558881478
+      },
+      {
+        "iteration": 7,
+        "texel_y": 6,
+        "texel_x": 18,
+        "channel": 0,
+        "step": 0.08,
+        "update_radius": 1,
+        "loss": 0.010304391097315124
+      }
+    ],
+    "lambda_smooth": 0.02,
+    "lambda_l2": 0.001,
+    "sample_count": 50,
+    "seed": 67,
+    "loss_seed": 71,
+    "update_radius": 1
+  },
+  "dense_no_cycle_ablation": {
+    "init_reflective_error_deg": 5.710456219994247,
+    "final_reflective_error_deg": 5.710456219994247,
+    "reflective_error_improvement_percent": 0.0,
+    "init_nonreflective_error_deg": 6.101541691089956,
+    "final_nonreflective_error_deg": 6.101541691089956,
+    "method_name": "dense_no_cycle_ablation",
+    "uses_reflection_cycle_loss": false,
+    "loss_history": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "pixel_baking": {
+    "specular_leakage_score": {
+      "all_pixels": 0.9919480983829291,
+      "oracle_mask_exclusion": 0.1759576639612197,
+      "noisy_mask_only": 0.5597000591369371,
+      "reflection_confidence_routing": 0.46191561235102124,
+      "normal_refinement_plus_routing": 0.4698866200528858
+    },
+    "albedo_rmse": {
+      "all_pixels": 0.19821339091316895,
+      "oracle_mask_exclusion": 0.0858472863357664,
+      "noisy_mask_only": 0.11773219570124858,
+      "reflection_confidence_routing": 0.10253435878597626,
+      "normal_refinement_plus_routing": 0.10378656860718423
+    }
+  },
+  "uv_texture_baking": {
+    "specular_leakage_score": {
+      "all_pixels": 0.9658763096531678,
+      "oracle_mask_exclusion": 0.17595366303189766,
+      "noisy_mask_only": 0.5556875799054598,
+      "reflection_confidence_routing": 0.4632458373229172,
+      "normal_refinement_plus_routing": 0.4714538905111631
+    },
+    "albedo_rmse": {
+      "all_pixels": 0.19476433951261005,
+      "oracle_mask_exclusion": 0.08583875055586604,
+      "noisy_mask_only": 0.1198380846631113,
+      "reflection_confidence_routing": 0.10370662500731515,
+      "normal_refinement_plus_routing": 0.10527666231588481
+    },
+    "atlas_resolution": [
+      64,
+      128
+    ]
+  },
+  "decision_checks": {
+    "loss_correlated_near_gt": true,
+    "reflector_hit_fraction_sufficient": true,
+    "dense_normal_error_improves_10_percent": false,
+    "dense_beats_no_cycle_ablation": true,
+    "routing_beats_all_pixels": true,
+    "routing_beats_noisy_mask": true,
+    "routing_beats_oracle_mask": false
+  },
+  "phase3": {
+    "milestone": "3.3",
+    "purpose": "stricter_scene_or_renderer_validation",
+    "renderer_path": "analytic_near_object_fallback",
+    "used_blender_cycles": false,
+    "implements_learned_near_field_reflection_field": false,
+    "implements_inter_reflection_residual": false,
+    "implements_full_pbr_optimization": false,
+    "claims_relighting_or_material_editing": false,
+    "claims_representation_novelty": false
+  },
+  "recommendation": "revise: dense normal improvement is positive but below the 10 percent gate"
+}

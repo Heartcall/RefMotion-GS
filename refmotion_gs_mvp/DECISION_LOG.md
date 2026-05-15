@@ -269,3 +269,330 @@ The Milestone 3.2 P0 planning repair is complete. Implementation remains blocked
 **Implication:**
 
 Future sessions should rerun the Milestone 3.2 pre-implementation authorization audit using `PROMPTS/pre_major_milestone_audit_prompt.md`. If approved with no P0 blockers, the next action may become Milestone 3.2 implementation using GPT-5.5 high.
+
+## 2026-05-15: Standard Continue Prompt As Model Confirmation
+
+**Evidence:**
+
+- Updated `PROMPTS/continue_current_work_prompt.md` so invoking the standard continue prompt is treated as operator confirmation that Codex CLI has already been switched to the model required by `NEXT_ACTION.md`.
+- Updated `OPERATING_PROTOCOL.md` with the same default-command model gate policy.
+- Updated `NEXT_ACTION.md` to remove the old requirement for a separate explicit model-confirmation phrase.
+- Preserved the rule that major audits must follow the required audit prompt and must not implement experiment code.
+
+**Decision:**
+
+Changed the model gate so the standard continue prompt itself serves as operator confirmation that the required model has been selected in Codex CLI.
+
+**Implication:**
+
+Future users can invoke `Use refmotion_gs_mvp/PROMPTS/continue_current_work_prompt.md.` without adding a separate model-confirmation phrase. Codex should stop for model reasons only when the user explicitly says the required model has not been selected.
+
+## 2026-05-15: Milestone 3.2 Pre-Implementation Audit Approved
+
+**Evidence:**
+
+- Reran the Milestone 3.2 pre-implementation authorization audit using `PROMPTS/pre_major_milestone_audit_prompt.md`.
+- `PHASE3_PLAN.md` now defines the dense / tangent-space normal parameterization, regularization, deterministic coordinate-search optimizer, tests, output schema, baseline suite, ablations, verification commands, and decision gates.
+- `outputs/phase3/milestone_32_preimplementation_audit.md` records the verdict.
+- No Milestone 3.2 experiment code was implemented during the audit.
+
+**Decision:**
+
+Milestone 3.2 is `APPROVED TO IMPLEMENT`.
+
+**Implication:**
+
+Future sessions should implement only Milestone 3.2 using GPT-5.5 high and `PROMPTS/milestone_implementation_prompt.md`. After implementation and verification, the milestone must receive a GPT-5.5 xhigh post-result audit before acceptance.
+
+## 2026-05-15: Milestone 3.2 Implementation Completed Pending Audit
+
+**Evidence:**
+
+- Implemented `src/dense_normal_optimization.py` and `scripts/run_phase3_milestone32.py`.
+- Added Milestone 3.2 tests for dense normal composition, dense cycle optimization, no-cycle ablation, and runner schema/scope flags.
+- `pytest refmotion_gs_mvp/tests -q` passed with `24 passed in 49.26s`.
+- Python compilation exited 0 for all source modules and MVP/Phase 3 runners.
+- `run_phase3_milestone32.py` wrote `metrics.json`, `summary.md`, and `dense_loss_history.png`.
+- Dense reflective-region normal error improved by `11.305327524690204` percent over perturbed initialization.
+- Dense reflection-cycle optimizer beat the no-cycle dense ablation on reflective normal error.
+- Routing beat all-pixel and noisy-mask baselines, but did not beat oracle mask exclusion.
+
+**Decision:**
+
+Milestone 3.2 implementation is complete but not accepted. It requires a GPT-5.5 xhigh post-result full go/no-go audit.
+
+**Implication:**
+
+Future sessions must not continue into Milestone 3.3 or paper claims yet. The next action is a major post-result audit using `PROMPTS/full_xhigh_audit_prompt.md`.
+
+## 2026-05-15: Milestone 3.2 Post-Result Audit Requires Revision
+
+**Evidence:**
+
+- `outputs/phase3/milestone_32_post_result_audit.md` records the full go/no-go audit.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py -q`: `3 passed in 32.09s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q`: `1 passed in 7.91s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `24 passed in 48.97s`.
+  - Python compilation exited 0.
+  - `run_phase3_milestone32.py` exited 0.
+- Dense reflective-region normal error improved by `11.305327524690204` percent and beat the no-cycle dense ablation.
+- Routing beat all-pixel and noisy-mask baselines, but did not beat oracle mask exclusion.
+- The produced runner configuration records `sample_count = 40` and `update_radius = 1`, while `PHASE3_PLAN.md` listed `sample_count = 250` and described single-texel coordinate proposals.
+
+**Decision:**
+
+Milestone 3.2 audit verdict is `GO AFTER REVISION`. The current candidate result is promising but not accepted until the P0 plan/result documentation revisions are resolved.
+
+**Implication:**
+
+Future sessions should repair the Milestone 3.2 plan/result documentation before starting Milestone 3.3. Required revisions must align the plan and result summary with the executed runner configuration, or rerun/report the strict planned configuration.
+
+## 2026-05-15: Milestone 3.2 Audit Revision Documentation Repaired
+
+**Evidence:**
+
+- Updated `PHASE3_PLAN.md` to explicitly distinguish the accepted Milestone 3.2 smoke configuration from stricter deferred settings.
+- The accepted smoke configuration is `sample_count = 40` and `update_radius = 1`.
+- The stricter deferred settings remain `sample_count = 250` and `update_radius = 0` for a future explicit rerun if needed.
+- Updated `outputs/phase3/milestone_32_dense_normals/summary.md` to state that dense normal improvement is marginal, the global-rotation reference remains stronger, and oracle mask exclusion remains substantially stronger on leakage.
+- No source, script, test, or experiment metric JSON was changed during this planning repair.
+
+**Decision:**
+
+The P0 documentation repair from the Milestone 3.2 post-result audit is complete as a planning/result-summary revision. Milestone 3.2 is still not accepted until this revision state passes a short audit.
+
+**Implication:**
+
+Future sessions should run `PROMPTS/short_audit_prompt.md` against the revised Milestone 3.2 plan/result state before moving to Milestone 3.3 or any stronger claim.
+
+## 2026-05-15: Milestone 3.2 Revision Short Audit Passed
+
+**Evidence:**
+
+- `outputs/phase3/milestone_32_revision_short_audit.md` records the short audit.
+- The audit confirmed `PHASE3_PLAN.md` and `outputs/phase3/milestone_32_dense_normals/summary.md` now match the executed Milestone 3.2 smoke configuration: `sample_count = 40` and `update_radius = 1`.
+- The summary reports marginal dense normal improvement, stronger global-rotation reference, and stronger oracle-mask leakage.
+- Verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q`: `1 passed in 7.69s`.
+  - `python -m py_compile refmotion_gs_mvp/src/dense_normal_optimization.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py`: exit code 0.
+  - `jq empty refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json`: exit code 0.
+  - `git diff --name-only refmotion_gs_mvp/src refmotion_gs_mvp/scripts refmotion_gs_mvp/tests`: no paths printed.
+
+**Decision:**
+
+Milestone 3.2 revision short audit verdict is `PASS`. The revision state is accepted as a documented lower-cost analytic smoke-result state.
+
+**Implication:**
+
+Future sessions may proceed to a GPT-5.5 xhigh pre-implementation authorization audit for Milestone 3.3 stricter scene or renderer validation. Do not implement Milestone 3.3 before that audit.
+
+## 2026-05-15: Milestone 3.3 Pre-Implementation Audit Blocked On Plan Detail
+
+**Evidence:**
+
+- `outputs/phase3/milestone_33_preimplementation_audit.md` records the GPT-5.5 xhigh pre-implementation authorization audit.
+- `PHASE3_PLAN.md` currently defines Milestone 3.3 only at a high level: prefer Blender/Cycles if available, otherwise use a more explicit analytic near-object reflection scene, keep ground truth and baselines, and preserve deterministic summaries.
+- `which blender` exited 1 in this session, so Blender/Cycles cannot be assumed available.
+- The plan does not yet define Milestone 3.3 scene design, files, tests, output schema, metrics, verification commands, baseline mapping, fallback trigger, or decision gates.
+- No Milestone 3.3 source, script, or test code was implemented during the audit.
+
+**Decision:**
+
+Milestone 3.3 implementation is `BLOCKED UNTIL PLAN FIXES`. The next action is a planning repair, not stricter-scene implementation.
+
+**Implication:**
+
+Future sessions should update `PHASE3_PLAN.md` with a complete Milestone 3.3 implementation subplan, using the analytic near-object fallback unless Blender/Cycles access is explicitly made available. After repair, rerun the GPT-5.5 xhigh pre-implementation authorization audit before implementing Milestone 3.3 code.
+
+## 2026-05-15: Milestone 3.3 Planning Repair Completed
+
+**Evidence:**
+
+- `PHASE3_PLAN.md` now contains an implementation-grade Milestone 3.3 plan for analytic near-object fallback validation.
+- The plan records Blender/Cycles as unavailable in the current workflow because `which blender` exited `1` during the pre-implementation audit.
+- The plan defines deterministic reflector geometry, camera split, ground-truth outputs, public API, tests, output schema, verification commands, preserved baselines, and decision gates.
+- No source, script, test, or experiment-result files were modified during this planning repair.
+
+**Decision:**
+
+Milestone 3.3 is ready for a rerun of the GPT-5.5 xhigh pre-implementation authorization audit. Implementation remains blocked until that audit returns `APPROVED TO IMPLEMENT` or `APPROVED WITH REQUIRED FIXES` without P0 blockers.
+
+**Implication:**
+
+Future sessions should run `PROMPTS/pre_major_milestone_audit_prompt.md` against the repaired Milestone 3.3 plan before implementing any Milestone 3.3 experiment code.
+
+## 2026-05-15: Milestone 3.3 Pre-Implementation Audit Approved With P1 Fixes
+
+**Evidence:**
+
+- `outputs/phase3/milestone_33_preimplementation_audit.md` records the rerun pre-implementation authorization audit.
+- The repaired `PHASE3_PLAN.md` now specifies the Milestone 3.3 analytic near-object fallback implementation path, scene design, file/API targets, tests, output schema, verification commands, baseline preservation, reviewer-risk coverage, and decision gates.
+- `which blender` still exits `1`, so the analytic near-object fallback remains the current implementation path.
+- No source, script, or test files were modified during the audit.
+
+**Decision:**
+
+Milestone 3.3 is `APPROVED WITH REQUIRED FIXES`. The remaining fixes are P1 implementation-time clarifications, not P0 blockers.
+
+**Implication:**
+
+Future sessions should implement only Milestone 3.3 using GPT-5.5 high and `PROMPTS/milestone_implementation_prompt.md`. After implementation and verification, the milestone must receive a GPT-5.5 xhigh post-result full go/no-go audit before acceptance.
+
+## 2026-05-15: Milestone 3.3 Implementation Completed Pending Audit
+
+**Evidence:**
+
+- Implemented the analytic near-object fallback scene and Milestone 3.3 runner.
+- Added tests for near-object scene determinism, finite reflector hit fraction, explicit `trace_reflector_color` return order, loss preference for ground-truth normals, runner schema, baseline preservation, and scope flags.
+- Verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_near_object_scene.py -q`: `3 passed in 1.66s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_runner.py -q`: `1 passed in 8.70s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `28 passed in 58.58s`.
+  - Python compilation exited `0`.
+  - Milestone 3.3 runner exited `0`.
+  - `jq empty` on `metrics.json` exited `0`.
+- Milestone 3.3 metrics:
+  - `reflector_hit_fraction`: `0.15492957746478872`.
+  - `loss_correlated_near_gt`: `true`.
+  - `dense_normal_error_improves_10_percent`: `false`.
+  - dense reflective-region normal improvement: `0.7685068728508346` percent.
+  - `dense_beats_no_cycle_ablation`: `true`.
+  - `routing_beats_all_pixels`: `true`.
+  - `routing_beats_noisy_mask`: `true`.
+  - `routing_beats_oracle_mask`: `false`.
+  - forbidden-component flags remain false.
+
+**Decision:**
+
+Milestone 3.3 implementation is complete but not accepted. It produced valid outputs and preserved scope, but the dense-normal improvement gate failed.
+
+**Implication:**
+
+Future sessions must run a GPT-5.5 xhigh post-result full go/no-go audit before deciding whether Milestone 3.3 should be revised, narrowed, pivoted, or stopped. Do not proceed to paper claims or a new implementation milestone before that audit.
+
+## 2026-05-15: Milestone 3.3 Post-Result Audit Requires Revision
+
+**Evidence:**
+
+- `outputs/phase3/milestone_33_post_result_audit.md` records the GPT-5.5 xhigh full go/no-go audit.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_near_object_scene.py -q`: `3 passed in 1.56s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_runner.py -q`: `1 passed in 8.90s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `28 passed in 61.46s`.
+  - Python compilation commands exited `0`.
+  - Milestone 3.3 runner exited `0`.
+  - `jq empty` on Milestone 3.3 `metrics.json` exited `0`.
+- Milestone 3.3 stayed in scope and preserved forbidden-component flags.
+- Milestone 3.3 failed the dense-normal improvement gate:
+  - dense reflective-region normal improvement: `0.7685068728508346` percent.
+  - required gate: at least `10` percent.
+- Oracle mask exclusion remains substantially stronger on leakage than normal-refinement-plus-routing.
+
+**Decision:**
+
+Milestone 3.3 verdict is `GO AFTER REVISION`. The implementation is reproducible and in scope, but it is not accepted as a passing major validation result.
+
+**Implication:**
+
+Future sessions should run a Milestone 3.3 revision planning repair using GPT-5.5 high. The repair must define diagnostics for the failed dense-normal gate before any new experiment code is implemented. Do not proceed to paper writing or stronger claims from the current Milestone 3.3 result.
+
+## 2026-05-15: Milestone 3.3 Revision Planning Repair Completed
+
+**Evidence:**
+
+- `PHASE3_PLAN.md` now includes section `8.14 Milestone 3.3 Revision: Dense-Normal Gate Failure Diagnostics`.
+- The revision subplan records the failed dense-normal gate from the post-result audit:
+  - dense reflective-region normal improvement: `0.7685068728508346` percent.
+  - required gate: at least `10` percent.
+- The subplan defines required diagnostics for objective-versus-normal-error trajectory, accepted-update normal-error history, active texel and finite-reflector hit coverage, non-reflective normal drift, routing comparisons, oracle-mask status, and reflector primitive reconciliation.
+- No source, script, test, or experiment-result metric files were changed during the planning repair.
+
+**Decision:**
+
+Milestone 3.3 planning repair is complete. The next step is a bounded diagnostic revision implementation, not paper writing, broader method expansion, or a pivot.
+
+**Implication:**
+
+Future sessions should implement only the Milestone 3.3 diagnostic revision using GPT-5.5 high. After implementation and verification, run a short audit before treating the revision state as accepted.
+
+## 2026-05-15: Milestone 3.3 Diagnostic Revision Implemented Pending Short Audit
+
+**Evidence:**
+
+- Created the Milestone 3.3 diagnostic revision module, runner, tests, and output directory.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: `2 passed in 1.86s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: `1 passed in 2.72s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `31 passed in 67.55s`.
+  - Python compilation exited `0`.
+  - revision runner exited `0`.
+  - `jq empty` on revision `metrics.json` exited `0`.
+- Key diagnostics:
+  - dense objective decreased from `0.014386876237571697` to `0.010304391097315124`.
+  - final reflective-region normal improvement remained `0.7685068728508346` percent.
+  - `worsened_reflective_update_count`: `5` of `8` accepted updates.
+  - `active_texels_without_finite_hits`: `34` of `64`.
+  - normal-refinement-plus-routing is worse than reflection-confidence routing on UV leakage.
+  - oracle mask exclusion remains substantially stronger on leakage.
+- Existing audited Milestone 3.3 and Milestone 3.2 result files were preserved.
+
+**Decision:**
+
+Milestone 3.3 diagnostic revision implementation is complete but not accepted. It requires a short audit before the revision state can be used for any next decision.
+
+**Implication:**
+
+Future sessions should run `PROMPTS/short_audit_prompt.md` using GPT-5.5 high. If the short audit passes, decide the exact next planning or revision action from the diagnostic evidence. If the short audit finds pivot or stop evidence, escalate to GPT-5.5 xhigh go/no-go / pivot review.
+
+## 2026-05-15: Milestone 3.3 Diagnostic Revision Short Audit Escalates to Go/No-Go
+
+**Evidence:**
+
+- `outputs/phase3/milestone_33_revision_short_audit.md` records the short audit.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: `2 passed in 1.94s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: `1 passed in 2.76s`.
+  - Python compilation exited `0`.
+  - `jq empty` on revision `metrics.json` exited `0`.
+- The diagnostic revision remains in scope and preserves forbidden-component flags.
+- The revision explains but does not fix the failed dense-normal gate:
+  - final reflective-region normal improvement remains `0.7685068728508346` percent.
+  - `5` of `8` accepted dense updates worsen reflective-region normal error.
+  - `34` of `64` active texels have no finite reflector hits.
+  - normal-refinement-plus-routing is worse than reflection-confidence routing and far worse than oracle mask exclusion on leakage.
+
+**Decision:**
+
+The diagnostic revision passes as a small diagnostic implementation, but it is not accepted as a validation pass. The evidence creates pivot-risk and requires a GPT-5.5 xhigh go/no-go / pivot audit before any further implementation.
+
+**Implication:**
+
+Future sessions should run a major post-result audit using `PROMPTS/full_xhigh_audit_prompt.md`. Do not implement new experiment code until that audit decides whether to revise the dense-normal formulation/scene, pivot toward benchmark/leakage-metric work, or stop.
+
+## 2026-05-15: Milestone 3.3 Diagnostic Revision Full Audit Pivots Project Direction
+
+**Evidence:**
+
+- `outputs/phase3/milestone_33_revision_full_go_no_go.md` records the GPT-5.5 xhigh full go/no-go / pivot audit.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: `2 passed in 1.92s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: `1 passed in 2.80s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `31 passed in 61.60s`.
+  - Python compilation exited `0`.
+  - temporary revision runner exited `0`.
+  - saved and temporary rerun `metrics.json` matched by `diff -q`.
+- The revision remains in scope and reproducible.
+- Dense-normal evidence remains below the acceptance gate:
+  - final reflective-region normal improvement: `0.7685068728508346` percent.
+  - `5` of `8` accepted dense updates worsen reflective-region normal error.
+  - `34` of `64` active texels have no finite reflector hits.
+  - normal-refinement-plus-routing is worse than reflection-confidence routing and far worse than oracle mask exclusion on leakage.
+
+**Decision:**
+
+Full audit verdict is `PIVOT`. RefMotion-GS should pivot away from further dense-normal optimizer implementation under the current Phase 3 setup and toward a benchmark / leakage-metric direction.
+
+**Implication:**
+
+Future sessions should create a pivot plan using GPT-5.5 high. Do not implement more dense-normal optimization code unless a future audited plan introduces a substantially different in-scope formulation and passes pre-implementation review.

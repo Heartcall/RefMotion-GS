@@ -1,8 +1,8 @@
-# Milestone 3.2 Pre-Implementation Authorization Audit
+# Pre-Implementation Authorization Audit
 
 ## Verdict
 
-BLOCKED UNTIL PLAN FIXES
+APPROVED TO IMPLEMENT
 
 ## Evidence Reviewed
 
@@ -25,60 +25,54 @@ BLOCKED UNTIL PLAN FIXES
 - Context-only source and tests:
   - `refmotion_gs_mvp/src/losses.py`
   - `refmotion_gs_mvp/src/normal_optimization.py`
+  - `refmotion_gs_mvp/src/uv_baking.py`
   - `refmotion_gs_mvp/src/decision_checks.py`
   - `refmotion_gs_mvp/src/experiment_protocol.py`
-  - `refmotion_gs_mvp/scripts/run_mvp_diagnostics.py`
   - `refmotion_gs_mvp/scripts/run_phase3_milestone31.py`
-  - `refmotion_gs_mvp/tests/test_feature_matching_and_losses.py`
-  - `refmotion_gs_mvp/tests/test_normal_optimization_and_baking.py`
+  - current test file list under `refmotion_gs_mvp/tests/`
 
 ## Pass/Fail Table
 
 | Criterion | Status | Evidence |
 |---|---|---|
-| Scope compliance | PASS | `ACTIVE_SCOPE.md` and `PHASE3_PLAN.md` keep the active project as RefMotion-GS and explicitly exclude learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, and representation-novelty claims. |
-| Formulation compliance | PASS WITH REQUIRED DETAIL | `outputs/phase2/theory_rewrite.md` defines Formulation A with optional tangent-space normal maps and reflected-ray geometry. `PHASE3_PLAN.md` says Milestone 3.2 must keep Formulation A, but it does not yet specify exactly how the dense normal variables enter the existing reflected-ray loss path. |
-| Implementation readiness | FAIL | `PHASE3_PLAN.md` lists required pre-implementation details for Milestone 3.2, including exact normal-update parameterization, smoothness/regularization terms, sampling count and seeds, comparison to global rotation, and result schema, but it does not define those details. |
-| Test readiness | FAIL | The plan does not name Milestone 3.2 test files, test functions, red/green sequence, or expected assertions for dense/tangent normal optimization. |
-| Baseline preservation | PASS WITH REQUIRED DETAIL | The plan preserves all MVP texture/leakage baselines and decision checks, but it does not specify the dense optimizer ablation without reflection-cycle loss or explain why that ablation is unnecessary. |
-| Metric and output readiness | FAIL | Minimum metrics are listed, but the exact `metrics.json` schema, summary sections, output directory, and machine-readable decision checks for Milestone 3.2 are not specified. |
-| Decision gates | PASS WITH REQUIRED DETAIL | Phase-level continue/revise/pivot/stop gates exist, and Milestone 3.2 lists minimum metrics. The plan still needs Milestone 3.2-specific pass/revise/pivot criteria tied to those metrics and outputs. |
-| Reviewer-risk coverage | PASS WITH REQUIRED DETAIL | The plan names MaterialRefGS, SpecTRe-GS, Ref-DGS, TextureSplat, and mask-only risks. Milestone 3.2 still needs an explicit ablation and reporting plan that separates reflected-ray geometry from photometric-variation and texture-only explanations. |
-| Code-change safety | PASS | This audit did not implement Milestone 3.2 code and did not change source, scripts, or tests. |
+| Scope compliance | PASS | `ACTIVE_SCOPE.md` and `PHASE3_PLAN.md` keep the project as RefMotion-GS and explicitly exclude learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, and representation-novelty claims. |
+| Formulation compliance | PASS | `outputs/phase2/theory_rewrite.md` defines Formulation A with optional tangent-space normal maps. `PHASE3_PLAN.md` binds Milestone 3.2 to the same path by composing `n_opt = normalize(n_init + a * t1 + b * t2)` and passing the composed normals into `reflection_cycle_loss`, which uses reflected directions and reflected-ray candidate matching. |
+| Implementation readiness | PASS | `PHASE3_PLAN.md` defines dense grid shape, tangent frame construction, initialization, clipping, smoothness/L2 regularization, deterministic coordinate-search settings, active texel selection, files to create, outputs, verification commands, and completion/failure criteria. |
+| Test readiness | PASS | The plan names `test_dense_normal_optimization.py` and `test_phase3_milestone32_runner.py` with unit-length, 10 percent reflective-error improvement, no-cycle ablation, schema, baseline, and forbidden-component assertions. |
+| Baseline preservation | PASS | The plan preserves all-pixel baking, oracle mask exclusion, noisy mask-only baking, reflection-confidence routing, normal-refinement-plus-routing, the global-rotation reference, a dense no-cycle ablation, and the proposed dense reflection-cycle optimizer. |
+| Metric and output readiness | PASS | The plan specifies `outputs/phase3/milestone_32_dense_normals/`, `metrics.json`, `summary.md`, `dense_loss_history.png`, required metric sections, phase flags, and machine-readable decision checks. |
+| Decision gates | PASS | Milestone 3.2 pass/revise/pivot/stop gates are explicit: dense reflective-region normal error must improve at least 10 percent, the dense reflection-cycle optimizer must beat the no-cycle ablation, loss correlation must remain valid, routing must beat all-pixel and noisy-mask baselines, oracle mask exclusion must be reported honestly, and forbidden components remain stop conditions. |
+| Reviewer-risk coverage | PASS | The plan keeps mask-only and texture-only baselines, preserves oracle-mask reporting, states MaterialRefGS is not fully closed by this milestone, and avoids SpecTRe-GS / Ref-DGS overlap by forbidding learned near-field reflection fields and local reflection Gaussians. |
+| Code-change safety | PASS | This audit did not implement Milestone 3.2 code and did not modify source, scripts, or tests. |
 
 ## Findings
 
-1. Milestone 3.2 is conceptually in scope. A dense or tangent-space normal diagnostic is allowed because it tests whether reflection-induced multi-view motion supervises reflective-region normals under less favorable degrees of freedom.
+1. The previous P0 blockers are resolved. The earlier audit was blocked because Milestone 3.2 lacked exact parameterization, regularization, optimizer settings, tests, output schema, and ablations. `PHASE3_PLAN.md` now specifies those items in Sections 7.2 through 7.10.
 
-2. Implementation is not authorized because the plan is under-specified at the exact point that the plan itself marks as mandatory. `PHASE3_PLAN.md` says exact parameterization, regularization, sampling, seed, comparison, and schema details are required before implementation, but it leaves them as requirements rather than decisions.
+2. The milestone remains inside the reduced RefMotion-GS scope. It tests whether reflection-induced multi-view motion can supervise reflective-region normals under denser degrees of freedom. It does not add learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, or representation-novelty claims.
 
-3. The existing implementation is still a global normal-rotation diagnostic. `src/normal_optimization.py` only exposes `optimize_global_normal_rotation`, and the current passing tests validate global rotation rather than dense or tangent-space normal variables.
+3. The formulation path is sufficiently bound to Formulation A. Dense tangent coefficients change surface normals, and those normals are passed into the existing `reflection_cycle_loss` reflected-ray geometry path. The plan does not authorize a learned reflection field or a post-hoc texture-only filter as the core signal.
 
-4. Formulation A remains the correct formulation boundary. `outputs/phase2/theory_rewrite.md` explicitly allows optional tangent-space normal maps and says normal changes should affect reflected-ray geometry, while avoiding learned reflection fields. The Milestone 3.2 plan must bind implementation to that path.
+4. The implementation plan is concrete enough for a GPT-5.5 high implementation session to proceed without inventing major method details. Minor API names inside `dense_normal_optimization.py` can be chosen during test-first implementation because the plan fixes the behavior, schema, and verification commands.
 
-5. The mask-only objection remains central. Milestone 3.1 preserves the result that `routing_beats_oracle_mask` is false, with oracle mask leakage `0.18894842742715495` versus normal-refinement-plus-routing leakage `0.19090032877604535`. Milestone 3.2 must keep oracle-mask reporting and explain any continuation only through measured noisy-mask robustness, albedo, seam, or normal-accuracy evidence.
+5. The baseline and decision gates are appropriately skeptical. The plan preserves oracle mask exclusion and requires a no-cycle dense ablation, so a future result cannot claim success from dense degrees of freedom or mask-only behavior alone.
 
 ## Required Fixes
 
-- P0: Add a dedicated Milestone 3.2 implementation subplan to `PHASE3_PLAN.md`.
-- P0: Define the dense / tangent-space normal parameterization exactly, including shape, coordinate frame, initialization from perturbed normals, unit-normal projection, and how the variables update `normals` passed into `reflection_cycle_loss`.
-- P0: Define smoothness or regularization terms exactly, including neighborhood definition, mask behavior, weight names/defaults, and whether regularization applies only to reflective/object pixels or all object pixels.
-- P0: Define the optimizer family, iteration count, step sizes or learning rate, deterministic seeds, sampling count, and acceptance/update rule.
-- P0: Define all files to create or modify for Milestone 3.2 and explicitly keep source changes out of forbidden components.
-- P0: Define tests before implementation, including at least one loss-ordering or normal-error test for the dense/tangent optimizer, one schema/baseline test, and one guardrail test showing forbidden components remain absent.
-- P0: Define the Milestone 3.2 output directory and exact `metrics.json` / `summary.md` schema.
-- P0: Define the baseline and ablation suite, including all existing MVP baselines and either a dense optimizer without reflection-cycle loss or an explicit, evidence-based justification for omitting that ablation.
-- P0: Define Milestone 3.2-specific pass/revise/pivot/stop criteria. At minimum, reflective-region normal error must improve by at least 10 percent over perturbed initialization, reflection-cycle loss must remain correlated with normal correctness, routing must beat all-pixel and noisy-mask baselines, and oracle mask exclusion must be reported honestly.
-- P1: State how the Milestone 3.2 summary will address MaterialRefGS / photometric-variation, TextureSplat / texture-only, SpecTRe-GS / Ref-DGS, and mask-only objections without claiming relighting, editing, full PBR, or representation novelty.
+- P0: none.
+- P1: During implementation, keep public helper names small and test-driven so the new dense normal module remains auditable.
+- P1: In the Milestone 3.2 summary, explicitly state that MaterialRefGS / photometric-variation risk is not fully closed unless a later baseline is added.
 
 ## Authorization Decision
 
-- Milestone 3.2 implementation is not authorized yet.
-- The correct next action is a planning repair, not experiment code.
-- The project should not pivot or stop: the MVP signal remains unfalsified, Milestone 3.1 passed, and the planned Milestone 3.2 direction is in scope once the P0 specification gaps are closed.
+- Milestone 3.2 is authorized for implementation.
+- Implementation must be limited to Milestone 3.2 from `PHASE3_PLAN.md`.
+- Use GPT-5.5 high for implementation.
+- Do not implement experiment code beyond the planned dense / tangent-space normal optimization diagnostic, runner, tests, and result outputs.
+- After implementation and verification, because Milestone 3.2 is a major method-validation milestone, update `NEXT_ACTION.md` to require a GPT-5.5 xhigh post-result audit before accepting the milestone.
 
 ## Next Action
 
-- Update `PHASE3_PLAN.md` with the Milestone 3.2 P0 implementation subplan listed above.
-- Do not implement Milestone 3.2 code during that planning repair.
-- After the planning repair, rerun the Milestone 3.2 pre-implementation authorization audit using GPT-5.5 xhigh.
+- Implement Milestone 3.2 dense / tangent-space normal optimization using `refmotion_gs_mvp/PROMPTS/milestone_implementation_prompt.md`.
+- Start with the planned tests in `refmotion_gs_mvp/tests/test_dense_normal_optimization.py` and `refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py`.
+- Run the verification commands specified in `PHASE3_PLAN.md`.

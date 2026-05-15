@@ -534,3 +534,674 @@ Decision:
 Next action:
 
 - Rerun the Milestone 3.2 pre-implementation authorization audit with explicit operator confirmation for GPT-5.5 xhigh.
+
+### Milestone 3.2 Pre-Implementation Authorization Audit Rerun
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_preimplementation_audit`.
+- Used `PROMPTS/pre_major_milestone_audit_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, `IMPLEMENTATION_LOG.md`, `MVP_RESULTS.md`, `DECISION_LOG.md`, `outputs/phase2/theory_rewrite.md`, `outputs/phase2/reviewer_attack.md`, `outputs/phase2/core_contribution_reduction.md`, `outputs/phase3/milestone_31_short_audit.md`, and the previous `outputs/phase3/milestone_32_preimplementation_audit.md`.
+- Read context-only source and outputs for the current Formulation A loss path, global normal optimizer, UV mapping helper, Phase 3.1 framework runner, and Phase 3.1 metrics summary.
+- Updated `outputs/phase3/milestone_32_preimplementation_audit.md`.
+
+Findings:
+
+- The repaired `PHASE3_PLAN.md` resolves the prior P0 blockers by specifying the dense sphere-UV tangent normal parameterization, normal projection/clipping, smoothness/L2 regularization, deterministic coordinate-search optimizer, active texel selection, planned files, tests, output schema, baselines, ablations, verification commands, and decision gates.
+- The planned milestone remains inside RefMotion-GS scope and preserves Formulation A.
+- The planned baseline suite includes all MVP mask/routing baselines, the global-rotation reference, the dense no-cycle ablation, and the proposed dense reflection-cycle optimizer.
+- This audit did not implement Milestone 3.2 code and did not modify source, scripts, tests, or `outputs/run_latest/`.
+
+Decision:
+
+- Verdict: `APPROVED TO IMPLEMENT`.
+- Milestone 3.2 implementation is authorized using GPT-5.5 high.
+- Because Milestone 3.2 is a major method-validation milestone, implementation results must later receive a GPT-5.5 xhigh post-result audit before acceptance.
+
+Next action:
+
+- Implement Milestone 3.2 dense / tangent-space normal optimization only, using `PROMPTS/milestone_implementation_prompt.md`.
+
+### Milestone 3.2 Dense / Tangent-Space Normal Optimization
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `implementation`.
+- Used `PROMPTS/milestone_implementation_prompt.md`.
+- Added tests first:
+  - `refmotion_gs_mvp/tests/test_dense_normal_optimization.py`
+  - `refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py`
+- Created:
+  - `refmotion_gs_mvp/src/dense_normal_optimization.py`
+  - `refmotion_gs_mvp/scripts/run_phase3_milestone32.py`
+- Wrote result files:
+  - `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/summary.md`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/dense_loss_history.png`
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q
+pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py
+python refmotion_gs_mvp/scripts/run_phase3_milestone32.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals
+```
+
+Observed:
+
+- Initial targeted red checks failed because `dense_normal_optimization.py` and `run_phase3_milestone32.py` did not exist.
+- `pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q`: `4 passed in 39.38s`.
+- `pytest refmotion_gs_mvp/tests -q`: `24 passed in 49.26s`.
+- `py_compile`: exit code 0.
+- Milestone 3.2 runner: exit code 0.
+- Runner decision checks:
+  - `loss_correlated_near_gt`: true.
+  - `dense_normal_error_improves_10_percent`: true.
+  - `dense_beats_no_cycle_ablation`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+- Dense normal metrics:
+  - parameterization: `sphere_uv_tangent_delta_grid`.
+  - UV grid: `16 x 32`.
+  - active texels: `64`.
+  - local proposal radius: `1`.
+  - sample count: `40`.
+  - reflective-region normal error improved from `5.663940679902162` deg to `5.0236136352350576` deg.
+  - reflective-region improvement: `11.305327524690204` percent.
+  - no-cycle dense ablation final reflective error: `5.663940679902162` deg.
+  - dense objective decreased from `0.007726688423605768` to `0.0034211424395956553`.
+- Global rotation reference remains stronger:
+  - final reflective error: `1.8457202307536418` deg.
+  - improvement: `67.41279022743005` percent.
+- Texture/leakage metrics:
+  - UV all-pixel leakage: `0.9841678157561735`.
+  - UV noisy-mask leakage: `0.47305854764111854`.
+  - UV normal-refinement-plus-routing leakage: `0.35270156748629633`.
+  - UV oracle-mask exclusion leakage: `0.18623485108324137`.
+
+Inference:
+
+- Milestone 3.2 satisfies the minimum dense-normal diagnostic gate on the analytic scene: dense reflection-cycle optimization improves reflective-region normal error by more than 10 percent and beats the no-cycle dense ablation.
+- The less favorable dense optimizer remains much weaker than the favorable global-rotation reference, which is expected and must be reported.
+- Routing still beats all-pixel and noisy-mask baselines, but oracle mask exclusion remains substantially stronger on leakage.
+- The evidence remains synthetic analytic evidence and does not support paper-level claims, relighting, editing, full PBR, learned near-field reflection fields, or representation novelty.
+
+Decision:
+
+- Milestone 3.2 implementation is complete pending required GPT-5.5 xhigh post-result audit.
+- Classify Milestone 3.2 as a major method-validation milestone.
+
+Next action:
+
+- Run a GPT-5.5 xhigh post-result full go/no-go audit using `PROMPTS/full_xhigh_audit_prompt.md`.
+
+### Milestone 3.2 Post-Result Full Go/No-Go Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_post_result_audit`.
+- Used `PROMPTS/full_xhigh_audit_prompt.md`.
+- Read the active scope, operating protocol, project and Phase 3 plans, implementation and decision logs, Phase 2 critique files, Milestone 3.1 audit, Milestone 3.2 pre-implementation audit, current Milestone 3.2 source/script/tests, and latest Milestone 3.2 outputs.
+- Wrote `outputs/phase3/milestone_32_post_result_audit.md`.
+- Ran fresh verification:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_dense_normal_optimization.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py
+python refmotion_gs_mvp/scripts/run_phase3_milestone32.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals
+```
+
+Observed:
+
+- Dense tests: `3 passed in 32.09s`.
+- Milestone 3.2 runner schema test: `1 passed in 7.91s`.
+- Full test suite: `24 passed in 48.97s`.
+- Python compilation: exit code 0.
+- Milestone 3.2 runner: exit code 0.
+- Runner decision checks:
+  - `loss_correlated_near_gt`: true.
+  - `dense_normal_error_improves_10_percent`: true.
+  - `dense_beats_no_cycle_ablation`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+- Dense reflective normal error improved by `11.305327524690204` percent, from `5.663940679902162` deg to `5.0236136352350576` deg.
+- Global-rotation reference remains stronger at `67.41279022743005` percent improvement.
+- UV leakage improved versus all-pixel `0.9841678157561735` and noisy-mask `0.47305854764111854`, but not versus oracle mask exclusion `0.18623485108324137`.
+- The produced Milestone 3.2 runner uses `sample_count = 40` and `update_radius = 1`, while the audited plan listed `sample_count = 250` and described single-texel coordinate proposals.
+
+Inference:
+
+- Milestone 3.2 passes the core evidence gates but only narrowly on dense reflective normal error.
+- The implementation remains in RefMotion-GS scope and preserves Formulation A.
+- The plan/result configuration mismatch must be repaired before the milestone is accepted or used to justify Milestone 3.3.
+
+Decision:
+
+- Full audit verdict: `GO AFTER REVISION`.
+- Do not begin Milestone 3.3 until the P0 revisions in `outputs/phase3/milestone_32_post_result_audit.md` are complete and audited as needed.
+
+Next action:
+
+- Repair the Milestone 3.2 plan/result documentation inconsistencies around `sample_count`, `update_radius`, and cautious result interpretation.
+
+### Milestone 3.2 Audit Revision Documentation Repair
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `planning`.
+- Used `PROMPTS/phase_plan_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, latest implementation and decision logs, `MVP_RESULTS.md`, Phase 2 evidence files, `outputs/phase3/milestone_32_post_result_audit.md`, Milestone 3.2 metrics and summary, and the relevant Milestone 3.2 source/script/test references.
+- Updated `PHASE3_PLAN.md` to distinguish the stricter optimizer helper setting from the accepted result-producing smoke configuration:
+  - current accepted smoke `sample_count`: `40`.
+  - stricter deferred sampling setting: `250`.
+  - current accepted smoke `update_radius`: `1`.
+  - strict single-texel proposal setting: `0`.
+- Updated `outputs/phase3/milestone_32_dense_normals/summary.md` to explicitly report:
+  - lower-cost smoke-run status,
+  - runner configuration,
+  - `update_radius = 1` local-neighborhood proposal semantics,
+  - marginal dense normal improvement over the 10 percent gate,
+  - stronger global-rotation reference,
+  - substantially stronger oracle mask exclusion leakage.
+
+Inference:
+
+- The Milestone 3.2 P0 documentation mismatch is resolved by documenting the executed run as the accepted lower-cost analytic smoke diagnostic rather than claiming it used the stricter pre-audit configuration.
+- No new experiment code was required for this repair.
+- Milestone 3.2 remains unaccepted until this repair receives the required short audit.
+
+Decision:
+
+- Planning/result documentation repair complete.
+- Do not begin Milestone 3.3 yet.
+
+Next action:
+
+- Run a short audit of the Milestone 3.2 revision state using `PROMPTS/short_audit_prompt.md`.
+
+### Milestone 3.2 Revision Short Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `short_audit`.
+- Used `PROMPTS/short_audit_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, latest logs and results, `PHASE3_PLAN.md`, `outputs/phase3/milestone_32_post_result_audit.md`, Milestone 3.2 metrics and summary, and relevant Milestone 3.2 source/script/test files.
+- Wrote `outputs/phase3/milestone_32_revision_short_audit.md`.
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_phase3_milestone32_runner.py -q
+python -m py_compile refmotion_gs_mvp/src/dense_normal_optimization.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py
+jq empty refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json
+git diff --name-only refmotion_gs_mvp/src refmotion_gs_mvp/scripts refmotion_gs_mvp/tests
+```
+
+Observed:
+
+- Runner schema test: `1 passed in 7.69s`.
+- Python compilation: exit code 0.
+- `metrics.json` JSON validation: exit code 0.
+- Source/script/test tracked diff check: no paths printed.
+
+Findings:
+
+- The repaired `PHASE3_PLAN.md` and `summary.md` now match the executed Milestone 3.2 smoke run: `sample_count = 40` and `update_radius = 1`.
+- The summary now explicitly reports the marginal dense-normal improvement, stronger global-rotation reference, and stronger oracle-mask leakage.
+- No forbidden RefMotion-GS scope expansion was introduced.
+- Existing runner schema and scope-flag tests still pass.
+
+Decision:
+
+- Short audit verdict: `PASS`.
+- Milestone 3.2 revision state is accepted as a documented lower-cost analytic smoke-result state.
+- Milestone 3.3 still requires a GPT-5.5 xhigh pre-implementation authorization audit before implementation.
+
+Next action:
+
+- Run the Milestone 3.3 pre-implementation authorization audit using GPT-5.5 xhigh and `PROMPTS/pre_major_milestone_audit_prompt.md`.
+
+### Milestone 3.3 Pre-Implementation Authorization Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_preimplementation_audit`.
+- Used `PROMPTS/pre_major_milestone_audit_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, latest implementation and decision logs, `MVP_RESULTS.md`, Phase 2 evidence files, Milestone 3.2 audit outputs, Milestone 3.2 metrics and summary, and context-only source/script/test listings.
+- Wrote `outputs/phase3/milestone_33_preimplementation_audit.md`.
+- Checked current environment and source-change safety:
+
+```bash
+which blender
+git diff --name-only refmotion_gs_mvp/src refmotion_gs_mvp/scripts refmotion_gs_mvp/tests
+jq '.decision_checks, .phase3' refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json
+rg -n "Milestone 3.3|Blender|Cycles|analytic near-object|near-object|output|test|verification|baseline" refmotion_gs_mvp/PHASE3_PLAN.md
+```
+
+Observed:
+
+- `which blender`: exit code 1, no executable found on `PATH`.
+- Source/script/test tracked diff check: no paths printed.
+- Milestone 3.2 metrics still report:
+  - `dense_normal_error_improves_10_percent`: true.
+  - `dense_beats_no_cycle_ablation`: true.
+  - `routing_beats_all_pixels`: true.
+  - `routing_beats_noisy_mask`: true.
+  - `routing_beats_oracle_mask`: false.
+  - forbidden-component flags remain false.
+- `PHASE3_PLAN.md` currently defines Milestone 3.3 only at a high level: prefer Blender/Cycles if available, otherwise use a more explicit analytic near-object reflection scene, keep ground truth and baselines, and preserve deterministic summaries.
+
+Inference:
+
+- Milestone 3.3 is an in-scope direction, but the current plan is not implementation-ready.
+- Because Blender is unavailable, the plan must define an explicit analytic near-object fallback before implementation can start.
+- A future implementation session would currently need to invent major scene, test, metric, output, and decision-gate details.
+
+Decision:
+
+- Pre-implementation authorization verdict: `BLOCKED UNTIL PLAN FIXES`.
+- Do not implement Milestone 3.3 code yet.
+
+Next action:
+
+- Repair `PHASE3_PLAN.md` with a complete Milestone 3.3 implementation subplan, then rerun the pre-implementation authorization audit.
+
+### Milestone 3.3 Planning Repair
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `planning`.
+- Used `PROMPTS/phase_plan_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PHASE3_PLAN.md`, latest implementation and decision logs, `MVP_RESULTS.md`, Phase 2 evidence files, Milestone 3.2 revision audit outputs, Milestone 3.2 dense-normal metrics and summary, and current `src/`, `scripts/`, and `tests/` listings.
+- Updated `PHASE3_PLAN.md` only for the Milestone 3.3 planning repair.
+- Did not implement Milestone 3.3 experiment code.
+
+Plan repair completed:
+
+- Defined the analytic near-object fallback as the current implementation path because `which blender` exited `1` during the prior pre-implementation audit.
+- Added deterministic scene design, camera split, reflector primitive defaults, reflection observation rule, Formulation A reuse, optimizer settings, public API, files to create, tests, output schema, verification commands, baseline mapping, and pass / revise / pivot / stop gates.
+- Preserved the RefMotion-GS scope lock: no learned near-field reflection fields, no inter-reflection residuals, no full PBR optimization, no relighting or material editing, and no representation-novelty claim.
+
+Verification:
+
+- Documentation-only workflow repair.
+- Source, script, test, and experiment-result files were intentionally left unchanged.
+
+Next action:
+
+- Rerun the Milestone 3.3 pre-implementation authorization audit using GPT-5.5 xhigh and `PROMPTS/pre_major_milestone_audit_prompt.md`.
+
+### Milestone 3.3 Pre-Implementation Authorization Audit Rerun
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_preimplementation_audit`.
+- Used `PROMPTS/pre_major_milestone_audit_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PROJECT_PLAN.md`, `PHASE3_PLAN.md`, `IMPLEMENTATION_LOG.md`, `MVP_RESULTS.md`, `DECISION_LOG.md`, Milestone 3.2 revision outputs, Milestone 3.2 dense-normal metrics and summary, Phase 2 scope and reviewer-risk files, and relevant source/script/test context.
+- Updated `outputs/phase3/milestone_33_preimplementation_audit.md`.
+- Checked environment and source-change safety:
+
+```bash
+which blender
+git diff --name-only refmotion_gs_mvp/src refmotion_gs_mvp/scripts refmotion_gs_mvp/tests
+jq '.decision_checks, .phase3, .dense_normal_optimization | . ' refmotion_gs_mvp/outputs/phase3/milestone_32_dense_normals/metrics.json
+rg -n "8\\.[0-9]|Milestone 3\\.3|analytic near-object|near_object_scene|run_phase3_milestone33|test_near_object_scene|metrics\\.json|Decision Gates|Scope Lock|Formulation" refmotion_gs_mvp/PHASE3_PLAN.md
+rg -n "learned near-field|inter-reflection|full PBR|relighting|material editing|representation novelty|oracle mask|noisy mask|TextureSplat|MaterialRefGS|SpecTRe-GS|Ref-DGS" refmotion_gs_mvp/PHASE3_PLAN.md refmotion_gs_mvp/ACTIVE_SCOPE.md outputs/phase2/*.md
+```
+
+Observed:
+
+- `which blender`: exit code `1`, no executable found on `PATH`.
+- Source/script/test tracked diff check: no paths printed.
+- The repaired Milestone 3.3 plan defines the analytic near-object fallback path, deterministic scene design, public API, tests, output schema, verification commands, baselines, reviewer-risk reporting, and pass/revise/pivot/stop gates.
+- Milestone 3.2 metrics still show a narrow but positive dense-normal smoke result and preserve forbidden-component flags.
+
+Decision:
+
+- Pre-implementation authorization verdict: `APPROVED WITH REQUIRED FIXES`.
+- No P0 blockers remain.
+- P1 implementation-time fixes:
+  - make `trace_reflector_color` return order explicit and tested,
+  - test scope guards through explicit runner `phase3` flags or explicit scene metadata,
+  - keep dense reflection-cycle optimizer naming consistent in schema and summaries.
+
+Next action:
+
+- Implement Milestone 3.3 analytic near-object fallback validation only, using GPT-5.5 high and `PROMPTS/milestone_implementation_prompt.md`.
+
+### Milestone 3.3 Analytic Near-Object Fallback Implementation
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `implementation`.
+- Used `PROMPTS/milestone_implementation_prompt.md`.
+- Added tests first:
+  - `refmotion_gs_mvp/tests/test_near_object_scene.py`
+  - `refmotion_gs_mvp/tests/test_phase3_milestone33_runner.py`
+- Initial red checks failed as expected because `near_object_scene.py` and `run_phase3_milestone33.py` did not exist.
+- Created:
+  - `refmotion_gs_mvp/src/near_object_scene.py`
+  - `refmotion_gs_mvp/scripts/run_phase3_milestone33.py`
+- Wrote result files:
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/metrics.json`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/summary.md`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/dense_loss_history.png`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/reflector_hit_map.png`
+- Ran:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_near_object_scene.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone33_runner.py -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py refmotion_gs_mvp/scripts/run_phase3_milestone33.py
+pytest refmotion_gs_mvp/tests -q
+python refmotion_gs_mvp/scripts/run_phase3_milestone33.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene
+jq empty refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/metrics.json
+```
+
+Observed:
+
+- Initial red checks:
+  - `test_near_object_scene.py`: failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.src.near_object_scene'`.
+  - `test_phase3_milestone33_runner.py`: failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.scripts.run_phase3_milestone33'`.
+- Targeted near-object scene tests after implementation: `3 passed in 1.66s`.
+- Targeted Milestone 3.3 runner test after implementation: `1 passed in 8.70s`.
+- Python compilation: exit code `0`.
+- Full test suite: `28 passed in 58.58s`.
+- Milestone 3.3 runner: exit code `0`.
+- `jq empty` on `metrics.json`: exit code `0`.
+
+Key metrics:
+
+- `reflector_hit_fraction`: `0.15492957746478872`.
+- `reflector_hit_fraction_sufficient`: `true`.
+- `loss_correlated_near_gt`: `true`.
+- Loss landscape:
+  - `0deg`: `0.01518530465164876`.
+  - `5deg`: `0.015862829735769086`.
+  - `10deg`: `0.01802097308944506`.
+- Dense reflection-cycle optimizer:
+  - initial reflective error: `5.710456219994247` deg.
+  - final reflective error: `5.666570971472453` deg.
+  - reflective error improvement: `0.7685068728508346` percent.
+  - `dense_normal_error_improves_10_percent`: `false`.
+  - `dense_beats_no_cycle_ablation`: `true`.
+- Routing and leakage:
+  - `routing_beats_all_pixels`: `true`.
+  - `routing_beats_noisy_mask`: `true`.
+  - `routing_beats_oracle_mask`: `false`.
+  - UV oracle mask exclusion leakage: `0.17595366303189766`.
+  - UV normal-refinement-plus-routing leakage: `0.4714538905111631`.
+- Scope flags:
+  - `used_blender_cycles`: `false`.
+  - `implements_learned_near_field_reflection_field`: `false`.
+  - `implements_inter_reflection_residual`: `false`.
+  - `implements_full_pbr_optimization`: `false`.
+  - `claims_relighting_or_material_editing`: `false`.
+  - `claims_representation_novelty`: `false`.
+
+Inference:
+
+- Milestone 3.3 successfully implements the analytic near-object fallback without forbidden scope expansion.
+- The stricter near-object scene provides finite reflector hits and preserves reflection-cycle loss correlation with normal correctness.
+- Dense normal optimization reduces the objective and beats the no-cycle dense ablation, but reflective-region normal error improves by only `0.7685068728508346` percent, below the required `10` percent gate.
+- Routing still beats all-pixel and noisy-mask baselines, but oracle mask exclusion remains substantially stronger on leakage.
+
+Decision:
+
+- Milestone 3.3 implementation is complete as an executable result-producing milestone, but it is not accepted.
+- Classify Milestone 3.3 as a major validation milestone.
+- Because the dense normal gate failed, a GPT-5.5 xhigh post-result full go/no-go audit is required to decide whether to revise, pivot, stop, or accept only a narrower diagnostic result.
+
+Next action:
+
+- Run a GPT-5.5 xhigh post-result full go/no-go audit using `PROMPTS/full_xhigh_audit_prompt.md`.
+
+### Milestone 3.3 Post-Result Full Go/No-Go Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_post_result_audit`.
+- Used `PROMPTS/full_xhigh_audit_prompt.md`.
+- Read the active scope, operating protocol, Phase 3 plan, implementation and decision logs, MVP results, relevant Phase 2 files, Milestone 3.2 and 3.3 outputs, and Milestone 3.3 source/script/test files.
+- Wrote `refmotion_gs_mvp/outputs/phase3/milestone_33_post_result_audit.md`.
+- Fresh verification passed:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_near_object_scene.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone33_runner.py -q
+pytest refmotion_gs_mvp/tests -q
+python -m py_compile refmotion_gs_mvp/src/near_object_scene.py refmotion_gs_mvp/src/dense_normal_optimization.py refmotion_gs_mvp/scripts/run_phase3_milestone33.py
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py refmotion_gs_mvp/scripts/run_phase3_milestone33.py
+python refmotion_gs_mvp/scripts/run_phase3_milestone33.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene
+jq empty refmotion_gs_mvp/outputs/phase3/milestone_33_near_object_scene/metrics.json
+```
+
+Observed:
+
+- Targeted near-object tests: `3 passed in 1.56s`.
+- Targeted Milestone 3.3 runner test: `1 passed in 8.90s`.
+- Full test suite: `28 passed in 61.46s`.
+- Python compilation commands exited `0`.
+- Milestone 3.3 runner exited `0`.
+- `jq empty` on Milestone 3.3 `metrics.json` exited `0`.
+- Current Milestone 3.3 decision checks:
+  - `loss_correlated_near_gt`: `true`.
+  - `reflector_hit_fraction_sufficient`: `true`.
+  - `dense_normal_error_improves_10_percent`: `false`.
+  - `dense_beats_no_cycle_ablation`: `true`.
+  - `routing_beats_all_pixels`: `true`.
+  - `routing_beats_noisy_mask`: `true`.
+  - `routing_beats_oracle_mask`: `false`.
+
+Inference:
+
+- Milestone 3.3 remains reproducible and in scope.
+- The analytic near-object fallback preserves reflection-cycle loss ordering and finite reflector visibility.
+- Dense objective descent is not yet aligned strongly enough with dense normal correctness: reflective-region normal error improves by only `0.7685068728508346` percent, below the required `10` percent gate.
+- Texture routing evidence remains partial because oracle mask exclusion remains much stronger than normal-refinement-plus-routing.
+
+Decision:
+
+- Full audit verdict: `GO AFTER REVISION`.
+- Milestone 3.3 is not accepted as a passing major validation result.
+- The result does not require immediate pivot or stop because loss correlation survives and dense optimization remains slightly positive versus initialization/no-cycle.
+
+Next action:
+
+- Run a Milestone 3.3 revision planning repair using GPT-5.5 high and `PROMPTS/phase_plan_prompt.md`.
+- The planning repair must define exact diagnostics, files, commands, and gates for the failed dense-normal improvement result before any revision code is implemented.
+
+### Milestone 3.3 Revision Planning Repair
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `planning`.
+- Used `PROMPTS/phase_plan_prompt.md`.
+- Read `AGENTS.md`, `ACTIVE_SCOPE.md`, `OPERATING_PROTOCOL.md`, `NEXT_ACTION.md`, `PROJECT_PLAN.md`, `PHASE3_PLAN.md`, latest implementation and decision logs, `MVP_RESULTS.md`, Phase 2 scope and reviewer-risk files, `outputs/phase3/milestone_33_post_result_audit.md`, and current Milestone 3.3 metrics and summary.
+- Updated `PHASE3_PLAN.md` with section `8.14 Milestone 3.3 Revision: Dense-Normal Gate Failure Diagnostics`.
+- The new revision subplan defines:
+  - exact reason for revision: dense reflective-region normal improvement was `0.7685068728508346%`, below the `10%` gate,
+  - diagnostic files to create,
+  - output directory and required artifacts,
+  - required diagnostic API,
+  - runner requirements,
+  - tests to add,
+  - verification commands,
+  - pass / revise / pivot / stop criteria,
+  - short-audit requirement after revision implementation.
+- No experiment code, source, scripts, tests, or experiment result metrics were modified during this planning action.
+
+Inference:
+
+- The next implementation can be bounded to a diagnostic revision rather than a broader method expansion.
+- The revision remains inside RefMotion-GS scope and preserves Formulation A, oracle mask exclusion, noisy mask-only, all-pixel, reflection-confidence routing, and normal-refinement-plus-routing comparisons.
+- The plan explicitly handles the reflector primitive mismatch between planned radii and implemented radii.
+
+Decision:
+
+- Milestone 3.3 revision planning repair is complete.
+- The next action is implementation of the diagnostic revision only, using GPT-5.5 high.
+
+Next action:
+
+- Implement the Milestone 3.3 dense-normal gate diagnostic revision from `PHASE3_PLAN.md` section 8.14 using `PROMPTS/milestone_implementation_prompt.md`.
+- Do not implement learned near-field reflection fields, inter-reflection residuals, full PBR optimization, relighting, material editing, or representation-novelty claims.
+
+### Milestone 3.3 Dense-Normal Gate Diagnostic Revision Implementation
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `implementation`.
+- Used `PROMPTS/milestone_implementation_prompt.md`.
+- Added tests first:
+  - `refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py`
+  - `refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py`
+- Initial red checks failed as expected because the new diagnostic module and runner did not exist:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: collection failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.src.phase3_revision_diagnostics'`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: collection failed with `ModuleNotFoundError: No module named 'refmotion_gs_mvp.scripts.run_phase3_milestone33_revision'`.
+- Created:
+  - `refmotion_gs_mvp/src/phase3_revision_diagnostics.py`
+  - `refmotion_gs_mvp/scripts/run_phase3_milestone33_revision.py`
+- Wrote result files:
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/summary.md`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/objective_vs_normal_error.png`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/reflector_hit_coverage_by_texel.png`
+- Verification passed:
+
+```bash
+pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q
+pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q
+python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/run_mvp_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone31.py refmotion_gs_mvp/scripts/run_phase3_milestone32.py refmotion_gs_mvp/scripts/run_phase3_milestone33.py refmotion_gs_mvp/scripts/run_phase3_milestone33_revision.py
+pytest refmotion_gs_mvp/tests -q
+python refmotion_gs_mvp/scripts/run_phase3_milestone33_revision.py --out-dir refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics
+jq empty refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json
+```
+
+Observed:
+
+- Diagnostic tests: `2 passed in 1.86s`.
+- Revision runner test: `1 passed in 2.72s`.
+- Python compilation: exit code `0`.
+- Full test suite: `31 passed in 67.55s`.
+- Revision runner: exit code `0`.
+- `jq empty` on revision `metrics.json`: exit code `0`.
+- Existing audited Milestone 3.3 output files and Milestone 3.2 output files were not modified by this implementation.
+
+Key metrics:
+
+- `objective_history`: decreased from `0.014386876237571697` to `0.010304391097315124`.
+- `reflective_error_history`: ended at `5.666570971472453` deg from `5.710456219994247` deg.
+- `reflective_improvement_history` final value: `0.7685068728508346` percent.
+- `worsened_reflective_update_count`: `5` of `8` accepted updates.
+- `objective_reflective_error_correlation`: `0.29366840127375765`.
+- `active_texel_count`: `64`.
+- `active_texels_without_finite_hits`: `34`.
+- `active_texel_hit_fraction_mean`: `0.17395833333333333`.
+- `active_texel_hit_fraction_min`: `0.0`.
+- `normal_refinement_improves_over_reflection_confidence`: `false`.
+- `normal_refinement_beats_noisy_mask`: `true`.
+- `normal_refinement_beats_oracle_mask`: `false`.
+- UV leakage:
+  - all pixels: `0.9658763096531678`.
+  - oracle mask exclusion: `0.17595366303189766`.
+  - noisy mask-only: `0.5556875799054598`.
+  - reflection-confidence routing: `0.4632458373229172`.
+  - normal-refinement-plus-routing: `0.4714538905111631`.
+
+Inference:
+
+- The diagnostic revision confirms that dense objective descent is not reliably aligned with per-update reflective-region normal improvement in the current finite-object smoke scene.
+- Most accepted dense objective updates worsen reflective-region normal error, and final dense improvement remains far below the `10` percent gate.
+- Active finite-reflector support is sparse: more than half of active texels have no finite-reflector hits.
+- Normal-refinement-plus-routing is worse than reflection-confidence routing and much worse than oracle mask exclusion on UV leakage, though it still beats noisy-mask-only.
+- The implementation remains inside RefMotion-GS scope and does not introduce forbidden components.
+
+Decision:
+
+- Milestone 3.3 diagnostic revision implementation is complete pending required short audit.
+- Classify this as a small diagnostic revision to a major validation milestone.
+- The current diagnostic recommendation is `revise: dense trajectory diagnostics explain the failed 10 percent normal gate`.
+
+Next action:
+
+- Run a short audit using GPT-5.5 high and `PROMPTS/short_audit_prompt.md`.
+- Do not treat the Milestone 3.3 revision state as accepted until the short audit passes.
+
+### Milestone 3.3 Diagnostic Revision Short Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `short_audit`.
+- Used `PROMPTS/short_audit_prompt.md`.
+- Wrote `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_short_audit.md`.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: `2 passed in 1.94s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: `1 passed in 2.76s`.
+  - `python -m py_compile refmotion_gs_mvp/src/phase3_revision_diagnostics.py refmotion_gs_mvp/scripts/run_phase3_milestone33_revision.py`: exit code `0`.
+  - `jq empty refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json`: exit code `0`.
+- Required diagnostic outputs exist:
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/summary.md`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/objective_vs_normal_error.png`
+  - `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/reflector_hit_coverage_by_texel.png`
+
+Findings:
+
+- The revision remains inside RefMotion-GS scope and preserves forbidden-component flags.
+- The revision is accepted as a diagnostic implementation, but not as a major validation pass.
+- The key failed gate remains unresolved: final reflective-region normal improvement is `0.7685068728508346` percent, below the required `10` percent.
+- Dense objective descent is weakly aligned with reflective normal correctness at best, and `5` of `8` accepted updates worsen reflective-region normal error.
+- Active finite-reflector support is sparse: `34` of `64` selected active texels have no finite hits.
+- Normal-refinement-plus-routing is worse than reflection-confidence routing and far worse than oracle mask exclusion on UV leakage.
+
+Decision:
+
+- Short audit verdict: pass as diagnostic revision, escalate for decision.
+- This audit finds pivot-risk evidence and therefore must not lead directly to another implementation milestone.
+
+Next action:
+
+- Run a GPT-5.5 xhigh go/no-go / pivot audit using `PROMPTS/full_xhigh_audit_prompt.md`.
+- Do not implement code before that audit decides whether to revise, pivot, or stop.
+
+### Milestone 3.3 Diagnostic Revision Full Go/No-Go / Pivot Audit
+
+Evidence:
+
+- Followed `PROMPTS/continue_current_work_prompt.md` with `NEXT_ACTION.md` action type `major_post_result_audit`.
+- Used `PROMPTS/full_xhigh_audit_prompt.md`.
+- Wrote `refmotion_gs_mvp/outputs/phase3/milestone_33_revision_full_go_no_go.md`.
+- Read the active scope, operating protocol, project and Phase 3 plans, implementation and decision logs, MVP results, Phase 2 scope and reviewer-risk files, prior Milestone 3.3 audit, diagnostic revision short audit, revision metrics/summary, revision source/script/tests, and related dense-normal / near-object files.
+- Fresh verification passed:
+  - `pytest refmotion_gs_mvp/tests/test_phase3_revision_diagnostics.py -q`: `2 passed in 1.92s`.
+  - `pytest refmotion_gs_mvp/tests/test_phase3_milestone33_revision_runner.py -q`: `1 passed in 2.80s`.
+  - `pytest refmotion_gs_mvp/tests -q`: `31 passed in 61.60s`.
+  - `python -m py_compile refmotion_gs_mvp/src/*.py refmotion_gs_mvp/scripts/*.py`: exit code `0`.
+  - `python refmotion_gs_mvp/scripts/run_phase3_milestone33_revision.py --out-dir /tmp/refmotion_gs_mvp_m33_revision_audit`: exit code `0`.
+  - `jq empty refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json`: exit code `0`.
+  - `jq empty /tmp/refmotion_gs_mvp_m33_revision_audit/metrics.json`: exit code `0`.
+  - `diff -q refmotion_gs_mvp/outputs/phase3/milestone_33_revision_diagnostics/metrics.json /tmp/refmotion_gs_mvp_m33_revision_audit/metrics.json`: exit code `0`.
+
+Inference:
+
+- The diagnostic revision is reproducible and in scope.
+- Dense objective descent does not provide enough reflective-region normal improvement to justify further implementation on the current dense-normal track.
+- The revision meets pivot triggers from `PHASE3_PLAN.md` section 8.14.8: repeated accepted updates worsen reflective-region normal error, active finite-reflector coverage is sparse, normal-refinement-plus-routing is worse than reflection-confidence routing, and oracle mask exclusion remains much stronger.
+- The project should not stop because the loss ordering, synthetic infrastructure, leakage metrics, and baseline comparisons remain useful for a narrower diagnostic benchmark direction.
+
+Decision:
+
+- Full audit verdict: `PIVOT`.
+- Do not implement more dense-normal optimization code from the current Milestone 3.3 track.
+- The next action is pivot planning using GPT-5.5 high.
+
+Next action:
+
+- Create a RefMotion-GS pivot plan for the benchmark / leakage-metric direction.
+- Do not implement experiment code until that pivot plan is written and audited.
